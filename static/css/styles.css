@@ -1,0 +1,103 @@
+/* Avante - Custom Styles */
+:root {
+  --primary: #166534;
+  --primary-light: #22c55e;
+  --primary-dark: #14532d;
+  --gold: #f59e0b;
+  --gold-light: #fbbf24;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #0f766e 100%);
+}
+
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+}
+
+.nav-link {
+  position: relative;
+  transition: all 0.2s;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+.nav-link:hover::after {
+  width: 70%;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  transition: all 0.3s;
+}
+.btn-gold:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+}
+
+.glow-border {
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: border-color 0.3s;
+}
+.glow-border:hover {
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* Glassmorphism */
+.glass-card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Stat card pulse */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+/* Input focus */
+.input-focus {
+  transition: all 0.2s;
+}
+.input-focus:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.15);
+}
+
+/* Shimmer loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

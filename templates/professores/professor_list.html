@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Professores - Avante{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Professores</h1>
+    <a href="{% url 'professores:create' %}" class="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600">Novo Professor</a>
+</div>
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="text-left px-4 py-3">Nome</th>
+                <th class="text-left px-4 py-3">Faixa</th>
+                <th class="text-left px-4 py-3">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professor in professores %}
+            <tr class="border-t hover:bg-gray-50">
+                <td class="px-4 py-3">{{ professor.user.get_full_name|default:professor.user.username }}</td>
+                <td class="px-4 py-3">{{ professor.faixa }} {{ professor.grau }}°</td>
+                <td class="px-4 py-3">
+                    <a href="{% url 'professores:update' professor.pk %}" class="text-blue-600 hover:underline">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">Nenhum professor cadastrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ aluno.nome }} - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold">{{ aluno.nome }}</h1>
+    <p class="text-gray-600">{{ aluno.faixa }} {{ aluno.grau }}° - {{ aluno.get_status_display }}</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="font-semibold mb-4">Dados Pessoais</h2>
+        <p><strong>CPF:</strong> {{ aluno.cpf }}</p>
+        <p><strong>E-mail:</strong> {{ aluno.email|default:"-" }}</p>
+        <p><strong>Telefone:</strong> {{ aluno.telefone|default:"-" }}</p>
+        <p><strong>Data Nasc.:</strong> {{ aluno.data_nascimento }}</p>
+        <p><strong>Data Início:</strong> {{ aluno.data_inicio }}</p>
+        <p><strong>Filial:</strong> {{ aluno.filial.nome|default:"-" }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="font-semibold mb-4">Graduações</h2>
+        <p class="text-gray-500 text-sm">Histórico de graduações aparecerá aqui.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login - Avante{% endblock %}
+{% block extra_head %}
+<style>
+  .login-bg {
+    background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.3)), url("{% static 'image/login-bg.svg' %}");
+    background-size: cover;
+    background-position: center;
+  }
+  .glass {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="min-h-screen login-bg flex items-center justify-center px-4">
+  <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+    <div class="text-center mb-8">
+      <img src="{% static 'image/avante.jpeg' %}" alt="Avante" class="h-16 mx-auto mb-4">
+      <h1 class="text-3xl font-black text-green-900 tracking-tight">AVANTE</h1>
+      <p class="text-green-700 text-sm mt-1">Disciplina no tatame. Controle na gestao.</p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">CPF ou E-mail</label>
+        <input type="text" name="username" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" required>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Senha</label>
+        <input type="password" name="password" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" required>
+      </div>
+      {% if form.errors %}
+      <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2">CPF/E-mail ou senha invalidos.</div>
+      {% endif %}
+      <button type="submit" class="w-full bg-gradient-to-r from-green-700 to-green-600 text-white py-2.5 rounded-lg hover:from-green-600 hover:to-green-500 font-semibold shadow-md hover:shadow-lg transition-all duration-200">
+        Entrar
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

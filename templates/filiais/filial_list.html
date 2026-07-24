@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Filiais - Avante{% endblock %}
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Filiais</h1>
+    <p class="text-gray-500 mt-1">Gerencie as unidades da academia</p>
+  </div>
+  <a href="{% url 'filiais:create' %}" class="bg-gradient-to-r from-green-700 to-green-600 text-white px-5 py-2.5 rounded-lg hover:from-green-600 hover:to-green-500 font-medium shadow-md hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2">
+    <i class="fas fa-plus"></i> Nova Filial
+  </a>
+</div>
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-100">
+          <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600"><i class="fas fa-building mr-2 text-green-600"></i>Nome</th>
+          <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-green-600"></i>Cidade</th>
+          <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600"><i class="fas fa-circle mr-2 text-green-600"></i>Status</th>
+          <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600"><i class="fas fa-cog mr-2 text-green-600"></i>Acoes</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for filial in filiais %}
+        <tr class="hover:bg-green-50/50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white font-bold text-sm">
+                {{ filial.nome|first|upper }}
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ filial.nome }}</p>
+                <p class="text-xs text-gray-400">{{ filial.endereco|truncatechars:40 }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-gray-600">{{ filial.cidade }}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium {% if filial.status == 'ativa' %}bg-green-100 text-green-700{% elif filial.status == 'inativa' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+              <i class="fas fa-circle text-[6px]"></i>
+              {{ filial.get_status_display }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <a href="{% url 'filiais:update' filial.pk %}" class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
+              <i class="fas fa-edit"></i> Editar
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-6 py-12 text-center">
+            <div class="flex flex-col items-center gap-3 text-gray-400">
+              <i class="fas fa-building text-5xl text-gray-200"></i>
+              <p class="text-lg font-medium text-gray-500">Nenhuma filial cadastrada</p>
+              <p class="text-sm">Clique em "Nova Filial" para comecar</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

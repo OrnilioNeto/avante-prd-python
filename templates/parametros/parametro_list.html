@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Parametros - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Parametros da Academia</h1>
+  <p class="text-gray-500 mt-1">Gerencie modalidades, horarios, graduacoes e parametros</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-dumbbell text-green-600"></i> Modalidades</h2>
+      <a href="{% url 'parametros:modalidade_create' %}" class="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-500 transition"><i class="fas fa-plus"></i> Nova</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for m in modalidades %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-green-50/50">
+        <span>{{ m.nome }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-2 py-0.5 rounded-full {% if m.ativo %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">{{ m.ativo|yesno:"Ativo,Inativo" }}</span>
+          <a href="{% url 'parametros:modalidade_delete' m.pk %}" class="text-red-500 hover:text-red-700 text-sm" onclick="return confirm('Excluir {{ m.nome }}?')"><i class="fas fa-trash"></i></a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="px-6 py-8 text-center text-gray-400"><i class="fas fa-plus-circle"></i> Nenhuma modalidade</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-clock text-green-600"></i> Horarios de Treino</h2>
+      <a href="{% url 'parametros:horario_create' %}" class="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-500 transition"><i class="fas fa-plus"></i> Novo</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for h in horarios %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-green-50/50">
+        <span>{{ h.descricao }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-2 py-0.5 rounded-full {% if h.ativo %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">{{ h.ativo|yesno:"Ativo,Inativo" }}</span>
+          <a href="{% url 'parametros:horario_delete' h.pk %}" class="text-red-500 hover:text-red-700 text-sm" onclick="return confirm('Excluir {{ h.descricao }}?')"><i class="fas fa-trash"></i></a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="px-6 py-8 text-center text-gray-400">Nenhum horario cadastrado</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-graduation-cap text-green-600"></i> Graduacoes</h2>
+      <a href="{% url 'parametros:graduacao_create' %}" class="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-500 transition"><i class="fas fa-plus"></i> Nova</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+          <tr>
+            <th class="text-left px-6 py-3">Faixa</th>
+            <th class="text-left px-6 py-3">Grau</th>
+            <th class="text-left px-6 py-3">Meses</th>
+            <th class="text-left px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for g in graduacoes %}
+          <tr class="hover:bg-green-50/50">
+            <td class="px-6 py-3">{{ g.faixa }}</td>
+            <td class="px-6 py-3">{{ g.grau }}</td>
+            <td class="px-6 py-3">{{ g.meses_para_proxima_graduacao }}</td>
+            <td class="px-6 py-3">
+              <a href="{% url 'parametros:graduacao_delete' g.pk %}" class="text-red-500 hover:text-red-700" onclick="return confirm('Excluir graduacao {{ g.faixa }} {{ g.grau }}?')"><i class="fas fa-trash"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Nenhuma graduacao cadastrada</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-sliders text-green-600"></i> Parametros</h2>
+      <a href="{% url 'parametros:academia_create' %}" class="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-500 transition"><i class="fas fa-plus"></i> Novo</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+          <tr>
+            <th class="text-left px-6 py-3">Secao</th>
+            <th class="text-left px-6 py-3">Titulo</th>
+            <th class="text-left px-6 py-3">Tipo</th>
+            <th class="text-left px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for p in academia_parametros %}
+          <tr class="hover:bg-green-50/50">
+            <td class="px-6 py-3"><span class="bg-gray-100 px-2 py-0.5 rounded text-xs">{{ p.secao }}</span></td>
+            <td class="px-6 py-3 font-medium">{{ p.titulo }}</td>
+            <td class="px-6 py-3 text-xs text-gray-500">{{ p.tipo }}</td>
+            <td class="px-6 py-3">
+              <a href="{% url 'parametros:academia_delete' p.pk %}" class="text-red-500 hover:text-red-700" onclick="return confirm('Excluir {{ p.titulo }}?')"><i class="fas fa-trash"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Nenhum parametro cadastrado</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
