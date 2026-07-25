@@ -136,10 +136,65 @@
       </div>
     </div>
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
-      <a href="{% url 'rede:seguindo' %}" class="text-sm font-medium text-gray-800 hover:text-green-600 transition flex items-center gap-2">
-        <i class="fas fa-user-check text-green-600"></i> Quem estou seguindo
-      </a>
+      <button onclick="document.getElementById('seguidoresModal').classList.remove('hidden')" class="text-sm font-medium text-gray-800 hover:text-green-600 transition flex items-center gap-2 w-full text-left">
+        <i class="fas fa-user-check text-green-600"></i> Seguindo & Seguidores
+      </button>
     </div>
   </div>
 </div>
+
+<div id="seguidoresModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 p-4" onclick="if(event.target==this)this.classList.add('hidden')">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h3 class="font-semibold text-gray-800">Conexões</h3>
+      <button onclick="document.getElementById('seguidoresModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="flex border-b border-gray-100">
+      <button id="tabSeguindo" onclick="switchTab('seguindo')" class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-green-600 text-green-600">Seguindo ({{ seguindo_users.count }})</button>
+      <button id="tabSeguidores" onclick="switchTab('seguidores')" class="flex-1 py-3 text-sm font-medium text-center text-gray-400 hover:text-gray-600">Seguidores ({{ seguidores_users.count }})</button>
+    </div>
+    <div id="conteudoSeguindo" class="overflow-y-auto divide-y divide-gray-50 flex-1">
+      {% for u in seguindo_users %}
+      <a href="{% url 'rede:perfil' u.pk %}" class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition">
+        {% if u.profile_photo %}
+        <img src="{{ u.profile_photo.url }}" class="h-9 w-9 rounded-full object-cover flex-shrink-0">
+        {% else %}
+        <div class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">{{ u.first_name|first|upper }}{{ u.last_name|first|upper }}</div>
+        {% endif %}
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-gray-800 truncate">{{ u.get_full_name|default:u.username }}</p>
+          <p class="text-xs text-gray-400">{{ u.get_role_display }}</p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="px-5 py-10 text-center text-gray-400 text-sm">Ninguém ainda.</div>
+      {% endfor %}
+    </div>
+    <div id="conteudoSeguidores" class="overflow-y-auto divide-y divide-gray-50 flex-1 hidden">
+      {% for u in seguidores_users %}
+      <a href="{% url 'rede:perfil' u.pk %}" class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition">
+        {% if u.profile_photo %}
+        <img src="{{ u.profile_photo.url }}" class="h-9 w-9 rounded-full object-cover flex-shrink-0">
+        {% else %}
+        <div class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">{{ u.first_name|first|upper }}{{ u.last_name|first|upper }}</div>
+        {% endif %}
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-gray-800 truncate">{{ u.get_full_name|default:u.username }}</p>
+          <p class="text-xs text-gray-400">{{ u.get_role_display }}</p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="px-5 py-10 text-center text-gray-400 text-sm">Ninguém ainda.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+function switchTab(tab) {
+  document.getElementById('conteudoSeguindo').classList.toggle('hidden', tab !== 'seguindo');
+  document.getElementById('conteudoSeguidores').classList.toggle('hidden', tab !== 'seguidores');
+  document.getElementById('tabSeguindo').className = (tab === 'seguindo' ? 'flex-1 py-3 text-sm font-medium text-center border-b-2 border-green-600 text-green-600' : 'flex-1 py-3 text-sm font-medium text-center text-gray-400 hover:text-gray-600');
+  document.getElementById('tabSeguidores').className = (tab === 'seguidores' ? 'flex-1 py-3 text-sm font-medium text-center border-b-2 border-green-600 text-green-600' : 'flex-1 py-3 text-sm font-medium text-center text-gray-400 hover:text-gray-600');
+}
+</script>
 {% endblock %}

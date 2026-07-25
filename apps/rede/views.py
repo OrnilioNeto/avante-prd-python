@@ -19,9 +19,14 @@ def feed(request):
         pk__in=list(seguindo_ids) + [user.pk]
     ).exclude(is_superuser=True)[:6]
 
+    seguindo_users = User.objects.filter(pk__in=seguindo_ids)
+    seguidores_users = User.objects.filter(pk__in=Follow.objects.filter(following=user).values('follower'))
+
     return render(request, 'rede/feed.html', {
         'posts': posts,
         'sugestoes': sugestoes,
+        'seguindo_users': seguindo_users,
+        'seguidores_users': seguidores_users,
     })
 
 
