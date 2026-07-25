@@ -1,9 +1,20 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 
 
+def _user_is_admin(user):
+    if user.is_superuser or user.role == 'super_admin':
+        return True
+    if user.role == 'professor':
+        try:
+            return user.professor_profile.perfil_acesso.is_admin if user.professor_profile.perfil_acesso else False
+        except:
+            pass
+    return False
+
+
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role == 'super_admin'
+        return _user_is_admin(self.request.user)
 
 
 class PermissaoMixin(UserPassesTestMixin):
@@ -11,13 +22,11 @@ class PermissaoMixin(UserPassesTestMixin):
 
     def test_func(self):
         user = self.request.user
-        if user.is_superuser or user.role == 'super_admin':
+        if _user_is_admin(user):
             return True
         if user.role == 'professor':
             try:
                 profile = user.professor_profile
-                if profile.perfil_acesso and profile.perfil_acesso.is_admin:
-                    return True
                 if self.permission_required:
                     return profile.has_permissao(self.permission_required)
                 return True
@@ -31,7 +40,7 @@ class RoleFilterMixin:
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
-        if user.is_superuser or user.role == 'super_admin':
+        if _user_is_admin(user):
             return qs
         if user.role == 'professor':
             return self._filter_professor(qs, user)
@@ -58,7 +67,7 @@ class RoleFilterDetailMixin:
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
         user = self.request.user
-        if user.is_superuser or user.role == 'super_admin':
+        if _user_is_admin(user):
             return obj
         if user.role == 'professor':
             try:

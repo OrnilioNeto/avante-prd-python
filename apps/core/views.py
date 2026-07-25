@@ -6,6 +6,7 @@ from django.db.models import Count, Sum, Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from apps.alunos.models import Aluno, MensalidadePagamento, GraduacaoAluno
+from apps.core.mixins import _user_is_admin
 
 
 @login_required
@@ -13,7 +14,7 @@ def dashboard(request):
     user = request.user
     ctx = {}
 
-    if user.is_superuser or user.role == 'super_admin':
+    if _user_is_admin(user):
         alunos = Aluno.objects.all()
     elif user.role == 'professor':
         try:
