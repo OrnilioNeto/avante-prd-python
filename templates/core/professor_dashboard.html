@@ -17,7 +17,7 @@
           {% csrf_token %}
           <label class="cursor-pointer bg-black/50 rounded-full p-1.5 text-white text-xs">
             <i class="fas fa-camera"></i>
-            <input type="file" name="profile_photo" accept="image/*" class="hidden" onchange="this.form.submit()">
+            <input type="file" name="profile_photo" accept="image/*" capture class="hidden" onchange="this.form.submit()">
           </label>
         </form>
       </div>
