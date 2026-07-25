@@ -63,6 +63,14 @@
       {% endif %}
     </div>
 
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5 space-y-3">
+      <a href="{% url 'core:registrar_presenca' %}" class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition text-center">
+        <i class="fas fa-check-circle mr-2"></i> Registrar Presença
+      </a>
+      <a href="{% url 'core:cartao_atleta' aluno.pk %}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition text-center">
+        <i class="fas fa-id-card mr-2"></i> Meu Cartão de Atleta
+      </a>
+    </div>
 
   </div>
 
@@ -167,6 +175,7 @@
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
       <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-user text-blue-600"></i> Meus Dados</h3>
       <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-gray-400">Código:</span> <span class="text-gray-700 font-mono font-bold">{{ aluno.codigo }}</span></div>
         <div><span class="text-gray-400">CPF:</span> <span class="text-gray-700">{{ aluno.cpf }}</span></div>
         <div><span class="text-gray-400">Email:</span> <span class="text-gray-700">{{ aluno.email|default:"-" }}</span></div>
         <div><span class="text-gray-400">Telefone:</span> <span class="text-gray-700">{{ aluno.telefone|default:"-" }}</span></div>

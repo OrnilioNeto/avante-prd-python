@@ -14,8 +14,10 @@ def dashboard(request):
     user = request.user
     ctx = {}
 
-    if user.role == 'aluno' and not _user_is_admin(user) and not user.role == 'professor':
+    if user.role == 'aluno' and not _user_is_admin(user):
         return redirect('core:minha_conta')
+    if user.role == 'professor' and not _user_is_admin(user):
+        return redirect('core:professor_dashboard')
     if _user_is_admin(user):
         alunos = Aluno.objects.all()
     elif user.role == 'professor':

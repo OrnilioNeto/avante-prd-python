@@ -9,7 +9,11 @@
         </h1>
         <p class="text-gray-500">{{ aluno.faixa }} {{ aluno.grau }}°</p>
     </div>
-    <a href="{% url 'alunos:update' aluno.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition flex items-center gap-2"><i class="fas fa-edit"></i> Editar</a>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'core:cartao_atleta' aluno.pk %}" class="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-500 transition text-sm flex items-center gap-1.5"><i class="fas fa-id-card"></i> Cartão</a>
+      <a href="{% url 'core:registrar_presenca' %}" class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-500 transition text-sm flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Presença</a>
+      <a href="{% url 'alunos:update' aluno.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition flex items-center gap-2"><i class="fas fa-edit"></i> Editar</a>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -17,6 +21,7 @@
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
             <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-user text-blue-600"></i> Dados Pessoais</h2>
             <div class="space-y-2 text-sm">
+                <p><strong>Código:</strong> <span class="font-mono font-bold">{{ aluno.codigo }}</span></p>
                 <p><strong>CPF:</strong> {{ aluno.cpf }}</p>
                 <p><strong>E-mail:</strong> {{ aluno.email|default:"-" }}</p>
                 <p><strong>Telefone:</strong> {{ aluno.telefone|default:"-" }}</p>
