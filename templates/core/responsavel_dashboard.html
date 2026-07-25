@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Meus Alunos - Avante{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Meus Alunos</h1>
+    <p class="text-gray-500 mt-1">Acompanhe o progresso dos alunos sob sua responsabilidade</p>
+  </div>
+  <div class="space-y-4">
+    {% for aluno in alunos %}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+      <div class="p-5 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+          {{ aluno.nome|first|upper }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h2 class="font-semibold text-gray-900 text-lg">{{ aluno.nome }}</h2>
+          <p class="text-sm text-gray-500">{{ aluno.faixa }} {{ aluno.grau }}° · Código: {{ aluno.codigo }}</p>
+          <p class="text-xs text-gray-400">{{ aluno.filial_nome }} · {{ aluno.horario_treino_descricao }}</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a href="{% url 'core:minha_conta' %}?aluno={{ aluno.pk }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition text-center">
+            <i class="fas fa-eye mr-1"></i> Painel
+          </a>
+          <a href="{% url 'core:cartao_atleta' aluno.pk %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition text-center">
+            <i class="fas fa-id-card mr-1"></i> Cartão
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-12 text-gray-400">
+      <i class="fas fa-child text-4xl mb-3 text-gray-300"></i>
+      <p>Nenhum aluno vinculado ao seu CPF.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

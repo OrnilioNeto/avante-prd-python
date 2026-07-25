@@ -16,6 +16,8 @@ def dashboard(request):
     ctx = {}
 
     if user.role == 'aluno' and not _user_is_admin(user):
+        if Aluno.objects.filter(responsavel_cpf=user.cpf).exists():
+            return redirect('core:responsavel_dashboard')
         return redirect('core:minha_conta')
     if user.role == 'professor':
         return redirect('core:professor_dashboard')
@@ -63,7 +65,18 @@ def upload_profile_photo(request):
 @login_required
 def minha_conta(request):
     user = request.user
-    aluno = get_object_or_404(Aluno, cpf=user.cpf)
+    aluno_pk = request.GET.get('aluno')
+    if aluno_pk:
+        aluno = get_object_or_404(Aluno, pk=aluno_pk)
+        if aluno.responsavel_cpf != user.cpf and aluno.cpf != user.cpf:
+            return redirect('core:minha_conta')
+    else:
+        try:
+            aluno = Aluno.objects.get(cpf=user.cpf)
+        except Aluno.DoesNotExist:
+            if Aluno.objects.filter(responsavel_cpf=user.cpf).exists():
+                return redirect('core:responsavel_dashboard')
+            return redirect('core:dashboard')
     hoje = date.today()
     from django.db.models import Exists, OuterRef, Sum
 
@@ -162,6 +175,12 @@ def minha_conta(request):
         'FAIXAS_ORDER': FAIXAS_ORDER,
         'midias': MidiaTreino.objects.filter(ativo=True)[:6],
     })
+
+
+@login_required
+def responsavel_dashboard(request):
+    alunos = Aluno.objects.filter(responsavel_cpf=request.user.cpf)
+    return render(request, 'core/responsavel_dashboard.html', {'alunos': alunos})
 
 
 def _get_ranking(aluno=None):

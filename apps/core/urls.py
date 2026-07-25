@@ -7,6 +7,7 @@ app_name = 'core'
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('meu-painel/', views.minha_conta, name='minha_conta'),
+    path('responsavel/', views.responsavel_dashboard, name='responsavel_dashboard'),
     path('minha-conta/', views.minha_conta),
     path('professor/', views.professor_dashboard, name='professor_dashboard'),
     path('professor/mensalidades-atrasadas/', views.mensalidades_atrasadas, name='mensalidades_atrasadas'),
