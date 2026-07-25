@@ -336,30 +336,46 @@ def test_email(request):
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
     import json, urllib.request
-    lines.append('--- Tentando Brevo REST API ---')
+    brevo_api_keys = ['b33835001@smtp-brevo.com', 'vIJXq0aOEC6SLb5z']
+    for key in brevo_api_keys:
+        lines.append(f'--- Tentando Brevo REST API com api-key={key[:8]}... ---')
+        try:
+            data = json.dumps({
+                'sender': {'email': 'avantebrazilianjj@gmail.com', 'name': 'Avante'},
+                'to': [{'email': to_email}],
+                'subject': 'Teste Avante API',
+                'textContent': f'Teste via Brevo REST API (key={key[:8]}...).',
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                'https://api.brevo.com/v3/smtp/email',
+                data=data,
+                headers={
+                    'api-key': key,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                method='POST',
+            )
+            resp = urllib.request.urlopen(req, timeout=30)
+            lines.append(f'API STATUS: key={key[:8]}... -> {resp.status} {resp.read().decode()[:200]}')
+            break
+        except urllib.error.HTTPError as e:
+            lines.append(f'key={key[:8]}... HTTP {e.code}: {e.read().decode()[:100]}')
+        except Exception as e:
+            lines.append(f'key={key[:8]}... ERROR: {type(e).__name__}: {e}')
+    lines.append(f'--- Tentando SMTP com usuario correto: b33835001@smtp-brevo.com ---')
     try:
-        data = json.dumps({
-            'sender': {'email': 'avantebrazilianjj@gmail.com', 'name': 'Avante'},
-            'to': [{'email': to_email}],
-            'subject': 'Teste Avante API',
-            'textContent': 'Teste via Brevo REST API.',
-        }).encode('utf-8')
-        req = urllib.request.Request(
-            'https://api.brevo.com/v3/smtp/email',
-            data=data,
-            headers={
-                'api-key': 'vIJXq0aOEC6SLb5z',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            method='POST',
+        backend = EmailBackend(
+            host='smtp-relay.brevo.com', port=587,
+            username='b33835001@smtp-brevo.com',
+            password='vIJXq0aOEC6SLb5z',
+            use_tls=True, fail_silently=False,
         )
-        resp = urllib.request.urlopen(req, timeout=30)
-        lines.append(f'API STATUS: {resp.status} {resp.read().decode()[:200]}')
-    except urllib.error.HTTPError as e:
-        lines.append(f'API HTTP ERROR {e.code}: {e.read().decode()[:200]}')
+        email = EmailMessage('Teste Avante', 'Teste via SMTP com usuario correto.', 'avante <avantebrazilianjj@gmail.com>', [to_email], connection=backend)
+        email.send()
+        lines.append('SMTP FUNCIONOU!')
     except Exception as e:
-        lines.append(f'API ERROR: {type(e).__name__}: {e}')
+        lines.append(f'SMTP: {type(e).__name__}: {e}')
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
 
@@ -376,7 +392,7 @@ def deploy_view(request):
             'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
             'EMAIL_HOST': 'smtp-relay.brevo.com',
             'EMAIL_PORT': '587',
-            'EMAIL_HOST_USER': 'avantebrazilianjj@gmail.com',
+            'EMAIL_HOST_USER': 'b33835001@smtp-brevo.com',
             'EMAIL_HOST_PASSWORD': 'vIJXq0aOEC6SLb5z',
             'EMAIL_USE_TLS': 'True',
             'DEFAULT_FROM_EMAIL': 'avante <avantebrazilianjj@gmail.com>',
