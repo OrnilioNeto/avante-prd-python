@@ -32,9 +32,13 @@ def dashboard(request):
         aluno__in=alunos, pago_em__isnull=False
     ).values('aluno').distinct().count()
 
-    pagamentos_atrasados = alunos.filter(
-        ~Q(pagamentos__pago_em__isnull=False)
-    ).count()
+    from django.db.models import Exists, OuterRef
+    paid_exists = MensalidadePagamento.objects.filter(
+        aluno=OuterRef('pk'), pago_em__isnull=False
+    )
+    pagamentos_atrasados = alunos.annotate(
+        tem_pagamento=Exists(paid_exists)
+    ).filter(tem_pagamento=False).count()
 
     ctx['total_alunos'] = total_alunos
     ctx['pagamentos_em_dia'] = pagamentos_em_dia
@@ -51,7 +55,15 @@ def minha_conta(request):
 
     pagamentos = MensalidadePagamento.objects.filter(aluno=aluno)
     ultimo_pagamento = pagamentos.order_by('-referencia_mes').first()
-    pagamentos_em_atraso = pagamentos.filter(pago_em__isnull=True, vencimento_em__lt=hoje)
+    from django.db.models import Exists, OuterRef
+    paid_for_same_month = MensalidadePagamento.objects.filter(
+        aluno=OuterRef('aluno'),
+        referencia_mes=OuterRef('referencia_mes'),
+        pago_em__isnull=False,
+    )
+    pagamentos_em_atraso = pagamentos.filter(
+        pago_em__isnull=True, vencimento_em__lt=hoje
+    ).exclude(Exists(paid_for_same_month))
     pagamentos_em_dia = pagamentos.filter(pago_em__isnull=False)
 
     proximo_vencimento = None
