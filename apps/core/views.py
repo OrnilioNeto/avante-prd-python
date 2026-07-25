@@ -485,10 +485,22 @@ def deploy_view(request):
             call_command('flush', '--noinput')
             from django.contrib.auth import get_user_model
             UserModel = get_user_model()
-            UserModel.objects.create_superuser('admin', 'admin@avante.com', 'admin')
+            if not UserModel.objects.filter(username='admin').exists():
+                UserModel.objects.create_superuser('admin', 'admin@avante.com', 'admin')
+            admin_user = UserModel.objects.filter(username='admin').first()
+            if admin_user and admin_user.must_change_password:
+                admin_user.must_change_password = False
+                admin_user.save(update_fields=['must_change_password'])
             output.append('Superuser admin/admin criado')
         output.append('=== MIGRATE ===')
         call_command('migrate', '--noinput')
+        if request.GET.get('reset'):
+            output.append('=== SEED ===')
+            try:
+                call_command('seed')
+                output.append('Seed concluido')
+            except Exception as e:
+                output.append(f'Seed error: {e}')
         output.append('=== CLEANUP DUPLICATE PAYMENTS ===')
         from django.db.models import Exists, OuterRef
         from apps.alunos.models import MensalidadePagamento
