@@ -459,7 +459,7 @@ def test_email(request):
 
 @staff_member_required
 def deploy_view(request):
-    import subprocess, os
+    import subprocess, os, sys
     from pathlib import Path
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
     output = []
