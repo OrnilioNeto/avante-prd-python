@@ -358,10 +358,10 @@ def deploy_view(request):
         env_path = str(Path(repo_root) / '.env')
         env_vars = {
             'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-            'EMAIL_HOST': 'smtp.gmail.com',
+            'EMAIL_HOST': 'smtp-relay.brevo.com',
             'EMAIL_PORT': '587',
             'EMAIL_HOST_USER': 'avantebrazilianjj@gmail.com',
-            'EMAIL_HOST_PASSWORD': '@Machado2025',
+            'EMAIL_HOST_PASSWORD': 'vIJXq0aOEC6SLb5z',
             'EMAIL_USE_TLS': 'True',
             'DEFAULT_FROM_EMAIL': 'avante <avantebrazilianjj@gmail.com>',
         }
