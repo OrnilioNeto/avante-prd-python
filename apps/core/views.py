@@ -318,10 +318,24 @@ def financeiro(request):
 @staff_member_required
 def deploy_view(request):
     import subprocess, os
-    # Use repo root (two levels up from this file)
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
     output = []
     try:
+        output.append('=== WRITE .ENV ===')
+        env_path = os.path.join(repo_root, '.env')
+        env_vars = {
+            'EMAIL_BACKEND': os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend'),
+            'EMAIL_HOST': os.environ.get('EMAIL_HOST', 'smtp.gmail.com'),
+            'EMAIL_PORT': os.environ.get('EMAIL_PORT', '587'),
+            'EMAIL_HOST_USER': os.environ.get('EMAIL_HOST_USER', 'avantebrazilianjj@gmail.com'),
+            'EMAIL_HOST_PASSWORD': os.environ.get('EMAIL_HOST_PASSWORD', '@Machado2025'),
+            'EMAIL_USE_TLS': os.environ.get('EMAIL_USE_TLS', 'True'),
+            'DEFAULT_FROM_EMAIL': os.environ.get('DEFAULT_FROM_EMAIL', 'avante <avantebrazilianjj@gmail.com>'),
+        }
+        with open(env_path, 'w') as f:
+            for k, v in env_vars.items():
+                f.write(f'{k}={v}\n')
+        output.append(f'.env criado com {len(env_vars)} variaveis')
         output.append('=== GIT RESET + CLEAN + PULL ===')
         r = subprocess.run(['git', 'reset', '--hard', 'HEAD'], capture_output=True, text=True, cwd=repo_root)
         output.append(r.stdout + r.stderr)
@@ -333,9 +347,16 @@ def deploy_view(request):
         call_command('migrate', '--noinput')
         output.append('=== COLLECTSTATIC ===')
         call_command('collectstatic', '--noinput', '--clear')
+        output.append('=== WRITE .ENV (pos-pull) ===')
+        with open(env_path, 'w') as f:
+            for k, v in env_vars.items():
+                f.write(f'{k}={v}\n')
+        output.append('.env recriado apos git clean')
         output.append('=== TOUCH WSGI ===')
         subprocess.run(['touch', '/var/www/avante_pythonanywhere_com_wsgi.py'])
         output.append('=== DONE ===')
     except Exception as e:
         output.append(f'ERROR: {e}')
+        import traceback
+        output.append(traceback.format_exc())
     return HttpResponse('<pre>' + '\n'.join(output) + '</pre>')
