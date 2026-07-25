@@ -4,23 +4,28 @@
 <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2 space-y-6">
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
-      <form method="post" action="{% url 'rede:criar_post' %}" enctype="multipart/form-data" class="flex items-center gap-3">
+      <form method="post" action="{% url 'rede:criar_post' %}" enctype="multipart/form-data" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {% csrf_token %}
-        {% if user.profile_photo %}
-        <img src="{{ user.profile_photo.url }}" class="h-10 w-10 rounded-full object-cover flex-shrink-0">
-        {% else %}
-        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">
-          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        <div class="flex items-center gap-3">
+          {% if user.profile_photo %}
+          <img src="{{ user.profile_photo.url }}" class="h-10 w-10 rounded-full object-cover flex-shrink-0">
+          {% else %}
+          <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+          </div>
+          {% endif %}
+          <input type="text" name="content" placeholder="O que está acontecendo, {{ user.first_name }}?" class="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-green-400">
         </div>
-        {% endif %}
-        <input type="text" name="content" placeholder="O que está acontecendo, {{ user.first_name }}?" class="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-green-400">
-        <label class="cursor-pointer text-gray-400 hover:text-green-600 transition p-2">
-          <i class="fas fa-image text-lg"></i>
-          <input type="file" name="image" accept="image/*" class="hidden" onchange="this.form.submit()">
-        </label>
-        <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition flex-shrink-0">
-          Publicar
-        </button>
+        <div class="flex items-center gap-2">
+          <label class="cursor-pointer text-gray-400 hover:text-green-600 transition p-2 flex items-center gap-1 text-sm" title="Adicionar imagem">
+            <i class="fas fa-image text-lg"></i>
+            <span class="hidden sm:inline">Foto</span>
+            <input type="file" name="image" accept="image/*" class="hidden">
+          </label>
+          <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition w-full sm:w-auto text-center">
+            Publicar
+          </button>
+        </div>
       </form>
     </div>
 
