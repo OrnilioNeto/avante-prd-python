@@ -399,6 +399,13 @@ def deploy_view(request):
         output.append(r.stdout + r.stderr)
         r = subprocess.run(['git', 'pull'], capture_output=True, text=True, cwd=repo_root)
         output.append(r.stdout + r.stderr)
+        if request.GET.get('reset'):
+            output.append('=== RESET DB ===')
+            call_command('flush', '--noinput')
+            from django.contrib.auth import get_user_model
+            UserModel = get_user_model()
+            UserModel.objects.create_superuser('admin', 'admin@avante.com', 'admin')
+            output.append('Superuser admin/admin criado')
         output.append('=== MIGRATE ===')
         call_command('migrate', '--noinput')
         output.append('=== CLEANUP DUPLICATE PAYMENTS ===')
