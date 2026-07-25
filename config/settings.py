@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'apps.convites',
     'apps.parametros',
     'apps.relatorios',
+    'apps.midia',
 ]
 
 MIDDLEWARE = [

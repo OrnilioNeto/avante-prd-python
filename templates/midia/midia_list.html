@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Mídias de Treino - Avante{% endblock %}
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Mídias de Treino</h1>
+    <p class="text-gray-500 mt-1">Fotos e vídeos dos treinos</p>
+  </div>
+  <a href="{% url 'midia:create' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+    <i class="fas fa-plus"></i> Nova Mídia
+  </a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for m in midias %}
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    {% if m.tipo == 'foto' and m.arquivo %}
+    <img src="{{ m.arquivo.url }}" alt="{{ m.titulo }}" class="w-full h-48 object-cover">
+    {% elif m.tipo == 'video' and m.url_youtube %}
+    <div class="w-full h-48 bg-gray-900 flex items-center justify-center">
+      <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ m.url_youtube|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/' }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+    {% else %}
+    <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+      <i class="fas {% if m.tipo == 'foto' %}fa-image{% else %}fa-video{% endif %} text-4xl"></i>
+    </div>
+    {% endif %}
+    <div class="p-4">
+      <h3 class="font-semibold text-gray-800">{{ m.titulo }}</h3>
+      <p class="text-sm text-gray-500 mt-1">{{ m.descricao|truncatewords:20 }}</p>
+      <div class="flex items-center justify-between mt-3 text-xs text-gray-400">
+        <span><i class="far fa-calendar mr-1"></i>{{ m.data_publicacao|date:"d/m/Y" }}</span>
+        <span class="px-2 py-0.5 rounded-full {% if m.tipo == 'foto' %}bg-blue-100 text-blue-600{% else %}bg-red-100 text-red-600{% endif %}">{{ m.get_tipo_display }}</span>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <a href="{% url 'midia:update' m.pk %}" class="text-blue-600 hover:text-blue-700 text-sm"><i class="fas fa-edit"></i></a>
+        <a href="{% url 'midia:delete' m.pk %}" class="text-red-600 hover:text-red-700 text-sm"><i class="fas fa-trash"></i></a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-span-full text-center py-12 text-gray-400">
+    <i class="fas fa-photo-video text-4xl mb-3 text-gray-300"></i>
+    <p>Nenhuma mídia cadastrada.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

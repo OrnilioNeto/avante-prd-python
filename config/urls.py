@@ -13,6 +13,7 @@ urlpatterns = [
     path('convites/', include('apps.convites.urls')),
     path('parametros/', include('apps.parametros.urls')),
     path('relatorios/', include('apps.relatorios.urls')),
+    path('midias/', include('apps.midia.urls')),
 ]
 
 if settings.DEBUG:

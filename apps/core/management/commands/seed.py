@@ -35,7 +35,7 @@ def run():
                 'ver_alunos', 'criar_alunos', 'editar_alunos',
                 'ver_financeiro', 'registrar_pagamento', 'excluir_pagamento',
                 'registrar_graduacao', 'ver_relatorios',
-                'gerenciar_convites', 'gerenciar_parametros', 'ver_dashboard',
+                'gerenciar_convites', 'gerenciar_parametros', 'ver_dashboard', 'gerenciar_midia',
             ],
             is_admin=True,
         ),

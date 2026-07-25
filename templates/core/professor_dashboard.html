@@ -4,9 +4,27 @@
 {% block content %}
 <div class="mb-6">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Painel do Professor</h1>
-      <p class="text-gray-500 mt-1">Visão geral da sua academia</p>
+    <div class="flex items-center gap-4">
+      <div class="relative group">
+        {% if user.profile_photo %}
+        <img src="{{ user.profile_photo.url }}" class="h-14 w-14 rounded-full object-cover border-2 border-green-300">
+        {% else %}
+        <div class="h-14 w-14 rounded-full bg-green-100 flex items-center justify-center text-xl font-bold text-green-700 border-2 border-green-300">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        {% endif %}
+        <form method="post" action="{% url 'core:upload_profile_photo' %}" enctype="multipart/form-data" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+          {% csrf_token %}
+          <label class="cursor-pointer bg-black/50 rounded-full p-1.5 text-white text-xs">
+            <i class="fas fa-camera"></i>
+            <input type="file" name="profile_photo" accept="image/*" class="hidden" onchange="this.form.submit()">
+          </label>
+        </form>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Painel do Professor</h1>
+        <p class="text-gray-500 mt-1">Visão geral da sua academia</p>
+      </div>
     </div>
     <div class="flex items-center gap-3 text-sm">
       <span class="text-gray-500"><i class="far fa-calendar-alt mr-1"></i>{% now "d/m/Y" %}</span>

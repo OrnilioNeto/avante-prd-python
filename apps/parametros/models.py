@@ -55,6 +55,7 @@ PERMISSOES_CHOICES = [
     ('gerenciar_convites', 'Gerenciar Convites'),
     ('gerenciar_parametros', 'Gerenciar Parâmetros'),
     ('ver_dashboard', 'Ver Dashboard'),
+    ('gerenciar_midia', 'Gerenciar Mídias'),
 ]
 
 

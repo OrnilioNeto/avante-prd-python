@@ -7,7 +7,7 @@
   <div class="lg:col-span-1 space-y-6">
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
       <div class="bg-gradient-to-r from-green-700 to-green-600 p-5 text-white text-center">
-        <div class="relative inline-block">
+        <div class="relative inline-block group">
           {% if user.profile_photo %}
             <img src="{{ user.profile_photo.url }}" class="h-20 w-20 rounded-full object-cover border-4 border-white/30 mx-auto shadow-lg">
           {% else %}
@@ -15,6 +15,13 @@
               {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
             </div>
           {% endif %}
+          <form method="post" action="{% url 'core:upload_profile_photo' %}" enctype="multipart/form-data" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            {% csrf_token %}
+            <label class="cursor-pointer bg-black/50 rounded-full p-2 text-white">
+              <i class="fas fa-camera"></i>
+              <input type="file" name="profile_photo" accept="image/*" class="hidden" onchange="this.form.submit()">
+            </label>
+          </form>
         </div>
         <h2 class="text-xl font-bold mt-3">{{ user.get_full_name|default:user.username }}</h2>
         <div class="flex items-center justify-center gap-2 mt-1">
@@ -171,6 +178,31 @@
         {% endfor %}
       </div>
     </div>
+
+    {% if midias %}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-photo-video text-green-600"></i> Mídias dos Treinos</h3>
+        <a href="{% url 'midia:list' %}" class="text-xs text-green-600 hover:text-green-700">Ver todas</a>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        {% for m in midias %}
+        <a href="{% if m.tipo == 'video' and m.url_youtube %}{{ m.url_youtube }}{% else %}#{% endif %}" target="_blank" class="block aspect-square rounded-lg overflow-hidden bg-gray-100 relative group">
+          {% if m.tipo == 'foto' and m.arquivo %}
+          <img src="{{ m.arquivo.url }}" class="w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gray-800 text-white">
+            <i class="fas fa-play text-2xl"></i>
+          </div>
+          {% endif %}
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+            <span class="text-white text-xs font-medium px-2 py-1 bg-black/60 rounded">{{ m.titulo|truncatechars:20 }}</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
       <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-user text-blue-600"></i> Meus Dados</h3>

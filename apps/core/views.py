@@ -6,6 +6,7 @@ from django.db.models import Count, Sum, Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from apps.alunos.models import Aluno, MensalidadePagamento, GraduacaoAluno
+from apps.midia.models import MidiaTreino
 from apps.core.mixins import _user_is_admin
 
 
@@ -49,6 +50,14 @@ def dashboard(request):
     ctx['pagamentos_atrasados'] = pagamentos_atrasados
 
     return render(request, 'core/dashboard.html', ctx)
+
+
+@login_required
+def upload_profile_photo(request):
+    if request.method == 'POST' and request.FILES.get('profile_photo'):
+        request.user.profile_photo = request.FILES['profile_photo']
+        request.user.save(update_fields=['profile_photo'])
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 @login_required
@@ -151,6 +160,7 @@ def minha_conta(request):
         'top3': top3,
         'ranking_count': ranking_count,
         'FAIXAS_ORDER': FAIXAS_ORDER,
+        'midias': MidiaTreino.objects.filter(ativo=True)[:6],
     })
 
 

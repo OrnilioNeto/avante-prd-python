@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Mídia - Avante{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{% if object %}Editar{% else %}Nova{% endif %} Mídia</h1>
+    <p class="text-gray-500 mt-1">Cadastre fotos ou vídeos dos treinos</p>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
+    {% csrf_token %}
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+        <input type="text" name="titulo" value="{{ form.titulo.value|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+        <textarea name="descricao" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5">{{ form.descricao.value|default:'' }}</textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+        <select name="tipo" class="w-full border border-gray-300 rounded-lg px-4 py-2.5" onchange="toggleFields(this.value)">
+          <option value="foto" {% if form.tipo.value == 'foto' %}selected{% endif %}>Foto</option>
+          <option value="video" {% if form.tipo.value == 'video' %}selected{% endif %}>Vídeo</option>
+        </select>
+      </div>
+      <div id="foto-field">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
+        <input type="file" name="arquivo" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2.5">
+        {% if object and object.arquivo %}<p class="text-xs text-gray-400 mt-1">Atual: {{ object.arquivo.name }}</p>{% endif %}
+      </div>
+      <div id="video-field">
+        <label class="block text-sm font-medium text-gray-700 mb-1">URL do YouTube</label>
+        <input type="url" name="url_youtube" value="{{ form.url_youtube.value|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="https://www.youtube.com/watch?v=...">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Data de Publicação *</label>
+        <input type="date" name="data_publicacao" value="{{ form.data_publicacao.value|date:'Y-m-d'|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+      </div>
+    </div>
+    <div class="mt-8 flex items-center gap-3">
+      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium transition">
+        <i class="fas fa-save mr-2"></i> Salvar
+      </button>
+      <a href="{% url 'midia:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+<script>
+function toggleFields(tipo) {
+  document.getElementById('foto-field').style.display = tipo === 'foto' ? 'block' : 'none';
+  document.getElementById('video-field').style.display = tipo === 'video' ? 'block' : 'none';
+}
+toggleFields('{{ form.tipo.value|default:"foto" }}');
+</script>
+{% endblock %}
