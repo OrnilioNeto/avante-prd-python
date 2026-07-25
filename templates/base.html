@@ -29,7 +29,7 @@
           {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_dashboard' %}
           <a href="{% url 'core:professor_dashboard' %}" class="nav-link px-2 py-1.5 rounded-lg hover:bg-white/10 transition whitespace-nowrap"><i class="fas fa-chart-pie mr-1"></i>Painel</a>
           {% endif %}
-          {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_alunos' %}
+          {% if user.is_superuser or user.role == 'super_admin' or user.role == 'professor' %}
           <a href="{% url 'alunos:list' %}" class="nav-link px-2 py-1.5 rounded-lg hover:bg-white/10 transition whitespace-nowrap"><i class="fas fa-users mr-1"></i>Alunos</a>
           {% endif %}
           <div class="w-px h-4 bg-white/20 mx-0.5 flex-shrink-0"></div>
@@ -73,7 +73,7 @@
         {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_dashboard' %}
         <a href="{% url 'core:professor_dashboard' %}" class="block px-3 py-2 rounded-lg hover:bg-white/10 transition"><i class="fas fa-chart-pie w-5"></i> Painel</a>
         {% endif %}
-        {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_alunos' %}
+        {% if user.is_superuser or user.role == 'super_admin' or user.role == 'professor' %}
         <a href="{% url 'alunos:list' %}" class="block px-3 py-2 rounded-lg hover:bg-white/10 transition"><i class="fas fa-users w-5"></i> Alunos</a>
         {% endif %}
         {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_financeiro' %}

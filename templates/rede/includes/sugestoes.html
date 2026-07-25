@@ -1,0 +1,20 @@
+{% for u in sugestoes %}
+<div class="flex items-center justify-between">
+  <a href="{% url 'rede:perfil' u.pk %}" class="flex items-center gap-2 min-w-0">
+    {% if u.profile_photo %}
+    <img src="{{ u.profile_photo.url }}" class="h-8 w-8 rounded-full object-cover flex-shrink-0">
+    {% else %}
+    <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-700 flex-shrink-0">
+      {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+    </div>
+    {% endif %}
+    <span class="text-sm font-medium text-gray-700 truncate">{{ u.get_full_name|default:u.username }}</span>
+  </a>
+  <form method="post" action="{% url 'rede:seguir' u.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="text-xs text-green-600 font-medium hover:text-green-700 whitespace-nowrap">Seguir</button>
+  </form>
+</div>
+{% empty %}
+<p class="text-xs text-gray-400 text-center">Nenhuma sugestão no momento.</p>
+{% endfor %}
