@@ -23,6 +23,20 @@ class AlunoListView(LoginRequiredMixin, PermissaoMixin, RoleFilterMixin, ListVie
     paginate_by = 50
 
 
+def _criar_user(cpf, nome, email='', role='aluno'):
+    cpf_limpo = ''.join(c for c in cpf if c.isdigit())
+    if User.objects.filter(cpf=cpf_limpo).exists():
+        return User.objects.filter(cpf=cpf_limpo).first()
+    nome_parts = nome.split()
+    username = cpf_limpo if not User.objects.filter(username=cpf_limpo).exists() else f'{role}_{User.objects.count()}'
+    return User.objects.create_user(
+        username=username, cpf=cpf_limpo, email=email or '',
+        first_name=nome_parts[0] if nome_parts else nome,
+        last_name=' '.join(nome_parts[1:]) if len(nome_parts) > 1 else '',
+        role=role, password=cpf_limpo, must_change_password=True,
+    )
+
+
 class AlunoCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
     permission_required = 'criar_alunos'
     model = Aluno
@@ -37,29 +51,15 @@ class AlunoCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
         ctx['modalidades_selecionadas'] = []
         return ctx
 
-    def _criar_user(self, cpf, nome, email='', role='aluno'):
-        cpf_limpo = ''.join(c for c in cpf if c.isdigit())
-        if User.objects.filter(cpf=cpf_limpo).exists():
-            return User.objects.filter(cpf=cpf_limpo).first()
-        nome_parts = nome.split()
-        username = cpf_limpo if not User.objects.filter(username=cpf_limpo).exists() else f'{role}_{User.objects.count()}'
-        user = User.objects.create_user(
-            username=username, cpf=cpf_limpo, email=email or '',
-            first_name=nome_parts[0] if nome_parts else nome,
-            last_name=' '.join(nome_parts[1:]) if len(nome_parts) > 1 else '',
-            role=role, password=cpf_limpo, must_change_password=True,
-        )
-        return user
-
     def form_valid(self, form):
         modalidades_ids = self.request.POST.getlist('modalidades')
         if modalidades_ids:
             form.instance.modalidades = [int(x) for x in modalidades_ids]
         response = super().form_valid(form)
         aluno = self.object
-        self._criar_user(aluno.cpf, aluno.nome, aluno.email)
+        _criar_user(aluno.cpf, aluno.nome, aluno.email)
         if aluno.tem_responsavel and aluno.responsavel_cpf:
-            self._criar_user(aluno.responsavel_cpf, aluno.responsavel_nome or 'Responsavel', role='aluno')
+            _criar_user(aluno.responsavel_cpf, aluno.responsavel_nome or 'Responsavel', role='aluno')
         return response
 
 
@@ -83,7 +83,11 @@ class AlunoUpdateView(LoginRequiredMixin, PermissaoMixin, UpdateView):
             form.instance.modalidades = [int(x) for x in modalidades_ids]
         else:
             form.instance.modalidades = []
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        aluno = self.object
+        if aluno.tem_responsavel and aluno.responsavel_cpf:
+            _criar_user(aluno.responsavel_cpf, aluno.responsavel_nome or 'Responsavel', role='aluno')
+        return response
 
 
 FAIXAS_ORDER = ['Branca', 'Azul', 'Roxa', 'Marrom', 'Preta']
