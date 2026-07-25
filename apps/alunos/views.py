@@ -92,17 +92,19 @@ class MensalidadeCreateView(LoginRequiredMixin, PermissaoMixin, View):
     permission_required = 'registrar_pagamento'
     def post(self, request, pk):
         aluno = get_object_or_404(Aluno, pk=pk)
-        referencia_mes_str = request.POST.get('referencia_mes')
-        vencimento_em_str = request.POST.get('vencimento_em')
-        valor_str = request.POST.get('valor')
-        pago_em_str = request.POST.get('pago_em') or None
-        observacao = request.POST.get('observacao', '')
-
         from decimal import Decimal
-        referencia_mes = datetime.strptime(referencia_mes_str, '%Y-%m').date()
-        vencimento_em = datetime.strptime(vencimento_em_str, '%Y-%m-%d').date()
-        valor = Decimal(valor_str)
-        pago_em = datetime.strptime(pago_em_str, '%Y-%m-%d').date() if pago_em_str else None
+        pago_em_str = request.POST.get('pago_em')
+        pago_em = datetime.strptime(pago_em_str, '%Y-%m-%d').date() if pago_em_str else date.today()
+        valor = Decimal(request.POST.get('valor'))
+
+        dia_venc = aluno.dia_vencimento or 5
+        referencia_mes = date(pago_em.year, pago_em.month, 1)
+        try:
+            vencimento_em = date(pago_em.year, pago_em.month, dia_venc)
+        except ValueError:
+            from calendar import monthrange
+            ultimo_dia = monthrange(pago_em.year, pago_em.month)[1]
+            vencimento_em = date(pago_em.year, pago_em.month, min(dia_venc, ultimo_dia))
 
         existing = MensalidadePagamento.objects.filter(
             aluno=aluno, referencia_mes=referencia_mes, pago_em__isnull=True
@@ -110,9 +112,6 @@ class MensalidadeCreateView(LoginRequiredMixin, PermissaoMixin, View):
         if existing:
             existing.pago_em = pago_em
             existing.valor = valor
-            existing.vencimento_em = vencimento_em
-            existing.observacao = observacao
-            existing.user = request.user
             existing.save()
         else:
             MensalidadePagamento.objects.create(
@@ -122,7 +121,6 @@ class MensalidadeCreateView(LoginRequiredMixin, PermissaoMixin, View):
                 vencimento_em=vencimento_em,
                 valor=valor,
                 pago_em=pago_em,
-                observacao=observacao,
             )
         return redirect('alunos:detail', pk=pk)
 

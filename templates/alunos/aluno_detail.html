@@ -57,13 +57,11 @@
             <form method="post" action="{% url 'alunos:mensalidade_create' aluno.pk %}" class="border-t pt-4 space-y-3">
                 {% csrf_token %}
                 <p class="text-sm font-medium text-gray-700">Registrar Pagamento</p>
+                <p class="text-xs text-gray-400">Vencimento: dia {{ aluno.dia_vencimento|default:"?" }} de cada mês</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="month" name="referencia_mes" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full" required>
-                    <input type="date" name="vencimento_em" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full" required>
-                    <input type="number" name="valor" step="0.01" placeholder="Valor" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full" required>
-                    <input type="date" name="pago_em" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full">
+                    <input type="date" name="pago_em" value="{% now 'Y-m-d' %}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full" required>
+                    <input type="number" name="valor" step="0.01" placeholder="Valor" value="{{ aluno.valor_mensalidade|default:'' }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full" required>
                 </div>
-                <input type="text" name="observacao" placeholder="Observação (opcional)" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full">
                 <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-500 text-sm w-full"><i class="fas fa-check"></i> Registrar Pagamento</button>
             </form>
         </div>
