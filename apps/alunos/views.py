@@ -227,7 +227,7 @@ def registrar_presenca(request):
                 presenca_hoje = True
             else:
                 Presenca.objects.create(aluno=aluno, data=hoje)
-                return redirect('alunos:cartao_atleta', aluno_id=aluno.pk)
+                return redirect('core:cartao_atleta', aluno_id=aluno.pk)
 
     return render(request, 'alunos/registrar_presenca.html', {
         'erro': erro,
