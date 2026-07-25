@@ -318,19 +318,26 @@ def financeiro(request):
 @staff_member_required
 def test_email(request):
     import traceback, os
+    from django.conf import settings as s
     from django.core.mail import send_mail
     lines = []
-    lines.append(f'EMAIL_BACKEND: {os.environ.get("EMAIL_BACKEND", "not set")}')
-    lines.append(f'EMAIL_HOST: {os.environ.get("EMAIL_HOST", "not set")}')
-    lines.append(f'EMAIL_PORT: {os.environ.get("EMAIL_PORT", "not set")}')
-    lines.append(f'EMAIL_HOST_USER: {os.environ.get("EMAIL_HOST_USER", "not set")}')
-    lines.append(f'EMAIL_USE_TLS: {os.environ.get("EMAIL_USE_TLS", "not set")}')
+    lines.append(f'os.environ EMAIL_BACKEND: {os.environ.get("EMAIL_BACKEND", "not set")}')
+    lines.append(f'settings EMAIL_BACKEND: {s.EMAIL_BACKEND}')
+    lines.append(f'settings EMAIL_HOST: {s.EMAIL_HOST}')
+    lines.append(f'settings EMAIL_PORT: {s.EMAIL_PORT}')
+    lines.append(f'settings EMAIL_HOST_USER: {s.EMAIL_HOST_USER}')
+    lines.append(f'settings EMAIL_USE_TLS: {s.EMAIL_USE_TLS}')
+    lines.append(f'settings DEFAULT_FROM_EMAIL: {s.DEFAULT_FROM_EMAIL}')
+    to_email = request.GET.get('to', 'avantebrazilianjj@gmail.com')
+    from apps.accounts.models import User
+    has_user = User.objects.filter(email=to_email).exists()
+    lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
     try:
         send_mail(
             'Teste Avante',
             'Este é um e-mail de teste do sistema Avante.',
             None,
-            ['avantebrazilianjj@gmail.com'],
+            [to_email],
             fail_silently=False,
         )
         lines.append('EMAIL ENVIADO COM SUCESSO!')
