@@ -36,8 +36,10 @@
                     <td class="px-4 py-3 text-sm">{{ aluno.filial.nome|default:"-" }}</td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-2">
-                            <a href="{% url 'alunos:detail' aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"><i class="fas fa-eye"></i></a>
-                            <a href="{% url 'alunos:update' aluno.pk %}" class="text-green-600 hover:text-green-800 text-sm flex items-center gap-1"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'alunos:detail' aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1" title="Detalhes"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'alunos:update' aluno.pk %}" class="text-green-600 hover:text-green-800 text-sm flex items-center gap-1" title="Editar"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'alunos:detail' aluno.pk %}#pagamento" class="text-amber-600 hover:text-amber-800 text-sm flex items-center gap-1" title="Registrar Pagamento"><i class="fas fa-credit-card"></i></a>
+                            <a href="{% url 'alunos:detail' aluno.pk %}#graduacao" class="text-purple-600 hover:text-purple-800 text-sm flex items-center gap-1" title="Registrar Graduação"><i class="fas fa-medal"></i></a>
                         </div>
                     </td>
                 </tr>
