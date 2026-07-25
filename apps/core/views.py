@@ -99,7 +99,7 @@ def professor_dashboard(request):
     user = request.user
     if user.role not in ('professor', 'super_admin') and not user.is_superuser:
         return render(request, 'core/dashboard.html', {'error': 'Acesso restrito a professores.'})
-    from django.db.models import Sum
+    from django.db.models import Sum, Exists, OuterRef
 
     alunos = _get_alunos_queryset(user).filter(status='ativo')
     hoje = date.today()
@@ -112,7 +112,18 @@ def professor_dashboard(request):
         referencia_mes=mes_atual,
     )
     em_dia = pagamentos_mes.filter(pago_em__isnull=False).count()
-    atrasados = pagamentos_mes.filter(pago_em__isnull=True, vencimento_em__lt=hoje).count()
+
+    paid_for_same_month = MensalidadePagamento.objects.filter(
+        aluno=OuterRef('aluno'),
+        referencia_mes=OuterRef('referencia_mes'),
+        pago_em__isnull=False,
+    )
+    unpaid_valid = MensalidadePagamento.objects.filter(
+        aluno__in=alunos,
+        pago_em__isnull=True,
+        vencimento_em__lt=hoje,
+    ).exclude(Exists(paid_for_same_month))
+    atrasados = unpaid_valid.values('aluno').distinct().count()
 
     receita_mes = pagamentos_mes.filter(pago_em__isnull=False).aggregate(
         total=Sum('valor')
@@ -126,11 +137,7 @@ def professor_dashboard(request):
         total=Sum('valor_mensalidade')
     )['total'] or 0
 
-    top_atrasados = MensalidadePagamento.objects.filter(
-        aluno__in=alunos,
-        pago_em__isnull=True,
-        vencimento_em__lt=hoje,
-    ).select_related('aluno', 'aluno__filial').order_by('vencimento_em')[:10]
+    top_atrasados = unpaid_valid.select_related('aluno', 'aluno__filial').order_by('vencimento_em')[:10]
 
     ultimos_alunos = alunos.order_by('-created_at')[:8]
 
@@ -197,24 +204,28 @@ def mensalidades_atrasadas(request):
     user = request.user
     if user.role not in ('professor', 'super_admin') and not user.is_superuser:
         from django.http import Http404; raise Http404()
-    from django.db.models import Sum
+    from django.db.models import Sum, Exists, OuterRef
 
     alunos = _get_alunos_queryset(user)
     hoje = date.today()
 
-    filial_id = request.GET.get('filial')
-    mes_ref = request.GET.get('mes')
-
+    paid_for_same_month = MensalidadePagamento.objects.filter(
+        aluno=OuterRef('aluno'),
+        referencia_mes=OuterRef('referencia_mes'),
+        pago_em__isnull=False,
+    )
     pagamentos = MensalidadePagamento.objects.filter(
         aluno__in=alunos,
         pago_em__isnull=True,
         vencimento_em__lt=hoje,
-    ).select_related('aluno', 'aluno__filial').order_by('vencimento_em')
+    ).exclude(Exists(paid_for_same_month)).select_related('aluno', 'aluno__filial').order_by('vencimento_em')
+
+    filial_id = request.GET.get('filial')
+    mes_ref = request.GET.get('mes')
 
     if filial_id:
         pagamentos = pagamentos.filter(aluno__filial_id=filial_id)
     if mes_ref:
-        from calendar import monthrange
         ano, mes = int(mes_ref[:4]), int(mes_ref[5:7])
         pagamentos = pagamentos.filter(
             referencia_mes__year=ano, referencia_mes__month=mes
@@ -375,6 +386,17 @@ def deploy_view(request):
         output.append(r.stdout + r.stderr)
         output.append('=== MIGRATE ===')
         call_command('migrate', '--noinput')
+        output.append('=== CLEANUP DUPLICATE PAYMENTS ===')
+        from django.db.models import Exists, OuterRef
+        from apps.alunos.models import MensalidadePagamento
+        paid = MensalidadePagamento.objects.filter(
+            aluno=OuterRef('aluno'),
+            referencia_mes=OuterRef('referencia_mes'),
+            pago_em__isnull=False,
+        )
+        qs = MensalidadePagamento.objects.filter(pago_em__isnull=True).filter(Exists(paid))
+        deleted, _ = qs.delete()
+        output.append(f'Registros duplicados removidos: {deleted}')
         output.append('=== COLLECTSTATIC ===')
         call_command('collectstatic', '--noinput', '--clear')
         output.append('=== WRITE .ENV (pos-pull) ===')

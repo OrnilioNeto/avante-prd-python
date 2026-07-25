@@ -104,15 +104,26 @@ class MensalidadeCreateView(LoginRequiredMixin, PermissaoMixin, View):
         valor = Decimal(valor_str)
         pago_em = datetime.strptime(pago_em_str, '%Y-%m-%d').date() if pago_em_str else None
 
-        MensalidadePagamento.objects.create(
-            aluno=aluno,
-            user=request.user,
-            referencia_mes=referencia_mes,
-            vencimento_em=vencimento_em,
-            valor=valor,
-            pago_em=pago_em,
-            observacao=observacao,
-        )
+        existing = MensalidadePagamento.objects.filter(
+            aluno=aluno, referencia_mes=referencia_mes, pago_em__isnull=True
+        ).first()
+        if existing:
+            existing.pago_em = pago_em
+            existing.valor = valor
+            existing.vencimento_em = vencimento_em
+            existing.observacao = observacao
+            existing.user = request.user
+            existing.save()
+        else:
+            MensalidadePagamento.objects.create(
+                aluno=aluno,
+                user=request.user,
+                referencia_mes=referencia_mes,
+                vencimento_em=vencimento_em,
+                valor=valor,
+                pago_em=pago_em,
+                observacao=observacao,
+            )
         return redirect('alunos:detail', pk=pk)
 
 
