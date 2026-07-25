@@ -13,10 +13,16 @@ def dashboard(request):
 @staff_member_required
 def deploy_view(request):
     import subprocess, os
+    # Use repo root (two levels up from this file)
+    repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
     output = []
     try:
-        output.append('=== GIT PULL ===')
-        r = subprocess.run(['git', 'pull'], capture_output=True, text=True, cwd=os.path.dirname(__file__))
+        output.append('=== GIT RESET + CLEAN + PULL ===')
+        r = subprocess.run(['git', 'reset', '--hard', 'HEAD'], capture_output=True, text=True, cwd=repo_root)
+        output.append(r.stdout + r.stderr)
+        r = subprocess.run(['git', 'clean', '-fd'], capture_output=True, text=True, cwd=repo_root)
+        output.append(r.stdout + r.stderr)
+        r = subprocess.run(['git', 'pull'], capture_output=True, text=True, cwd=repo_root)
         output.append(r.stdout + r.stderr)
         output.append('=== MIGRATE ===')
         call_command('migrate', '--noinput')

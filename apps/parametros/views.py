@@ -7,7 +7,7 @@ from .models import Modalidade, HorarioTreino, GraduacaoParametro, AcademiaParam
 
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.role == 'super_admin'
+        return self.request.user.role == 'super_admin' or self.request.user.is_superuser
 
 
 class ParametroListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
