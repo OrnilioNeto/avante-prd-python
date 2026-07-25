@@ -21,20 +21,40 @@ class ProfessorForm(forms.ModelForm):
             'grau': 'Grau',
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.user:
+            self.fields['primeiro_nome'].initial = self.instance.user.first_name
+            self.fields['ultimo_nome'].initial = self.instance.user.last_name
+            self.fields['email'].initial = self.instance.user.email
+            self.fields['cpf'].initial = self.instance.user.cpf
+            self.fields['telefone'].initial = self.instance.user.telefone
+            self.fields['cpf'].widget.attrs['readonly'] = True
+
     def save(self, commit=True):
         data = self.cleaned_data
-        user = User.objects.create_user(
-            username=data['cpf'],
-            email=data['email'],
-            password='123456',
-            first_name=data['primeiro_nome'],
-            last_name=data['ultimo_nome'],
-            cpf=data['cpf'],
-            telefone=data.get('telefone', ''),
-            role='professor',
-        )
         professor = super().save(commit=False)
-        professor.user = user
+        if professor.pk and professor.user:
+            user = professor.user
+            user.first_name = data['primeiro_nome']
+            user.last_name = data['ultimo_nome']
+            user.email = data['email']
+            user.cpf = data['cpf']
+            user.telefone = data.get('telefone', '')
+            if commit:
+                user.save()
+        else:
+            user = User.objects.create_user(
+                username=data['cpf'],
+                email=data['email'],
+                password='123456',
+                first_name=data['primeiro_nome'],
+                last_name=data['ultimo_nome'],
+                cpf=data['cpf'],
+                telefone=data.get('telefone', ''),
+                role='professor',
+            )
+            professor.user = user
         if commit:
             professor.save()
             self.save_m2m()
