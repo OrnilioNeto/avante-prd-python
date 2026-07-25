@@ -150,8 +150,8 @@
     animation: slideInR 0.8s ease-out;
     transform: scaleX(-1);
   }
-  .sensei:hover .sensei-body { animation: bow 0.8s ease-in-out 2; }
-  .sensei-right:hover .sensei-body { animation: bowR 0.8s ease-in-out 2; }
+  .sensei:hover .sensei-fig { animation: bow 0.8s ease-in-out 2; }
+  .sensei-right:hover .sensei-fig { animation: bowR 0.8s ease-in-out 2; }
   .sensei-head {
     width: 20px; height: 20px;
     background: #fde68a;
@@ -185,6 +185,7 @@
     bottom: -8px; left: 4px;
     border-radius: 0 0 4px 4px;
   }
+  .sensei-fig { width: 30px; margin: 0 auto; }
   .sensei-legs {
     display: flex;
     justify-content: space-between;
@@ -275,18 +276,22 @@
     </div>
   </div>
   <div class="sensei sensei-left">
-    <div class="sensei-head"></div>
-    <div class="sensei-body">
-      <div class="sensei-belt"></div>
+    <div class="sensei-fig">
+      <div class="sensei-head"></div>
+      <div class="sensei-body">
+        <div class="sensei-belt"></div>
+      </div>
+      <div class="sensei-legs"><div></div><div></div></div>
     </div>
-    <div class="sensei-legs"><div></div><div></div></div>
   </div>
   <div class="sensei sensei-right">
-    <div class="sensei-head"></div>
-    <div class="sensei-body">
-      <div class="sensei-belt"></div>
+    <div class="sensei-fig">
+      <div class="sensei-head"></div>
+      <div class="sensei-body">
+        <div class="sensei-belt"></div>
+      </div>
+      <div class="sensei-legs"><div></div><div></div></div>
     </div>
-    <div class="sensei-legs"><div></div><div></div></div>
   </div>
 </div>
 {% endblock %}
