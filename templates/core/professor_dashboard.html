@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Painel do Professor - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Painel do Professor</h1>
+      <p class="text-gray-500 mt-1">Visão geral da sua academia</p>
+    </div>
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-gray-500"><i class="far fa-calendar-alt mr-1"></i>{% now "d/m/Y" %}</span>
+      <a href="{% url 'core:mensalidades_atrasadas' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+        <i class="fas fa-exclamation-triangle"></i> Atrasados
+      </a>
+      <a href="{% url 'core:financeiro' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+        <i class="fas fa-dollar-sign"></i> Financeiro
+      </a>
+    </div>
+  </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+  <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 rounded-xl shadow-lg text-white relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-8 -mt-8"></div>
+    <div class="flex items-center justify-between mb-3">
+      <i class="fas fa-users text-2xl opacity-80"></i>
+      <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Ativos</span>
+    </div>
+    <p class="text-3xl font-bold">{{ total_ativos }}</p>
+    <p class="text-sm opacity-80 mt-1">Alunos Ativos</p>
+  </div>
+  <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-5 rounded-xl shadow-lg text-white">
+    <div class="flex items-center justify-between mb-3">
+      <i class="fas fa-check-circle text-2xl opacity-80"></i>
+      <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Em dia</span>
+    </div>
+    <p class="text-3xl font-bold">{{ em_dia }}</p>
+    <p class="text-sm opacity-80 mt-1">Mensalidades em Dia</p>
+  </div>
+  <div class="bg-gradient-to-br from-red-500 to-red-600 p-5 rounded-xl shadow-lg text-white">
+    <div class="flex items-center justify-between mb-3">
+      <i class="fas fa-exclamation-triangle text-2xl opacity-80"></i>
+      <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Atraso</span>
+    </div>
+    <p class="text-3xl font-bold">{{ atrasados }}</p>
+    <p class="text-sm opacity-80 mt-1">Mensalidades Atrasadas</p>
+    {% if sem_pagamento %}
+    <p class="text-xs opacity-70 mt-1">+{{ sem_pagamento }} sem registro</p>
+    {% endif %}
+  </div>
+  <div class="bg-gradient-to-br from-amber-500 to-amber-600 p-5 rounded-xl shadow-lg text-white">
+    <div class="flex items-center justify-between mb-3">
+      <i class="fas fa-coins text-2xl opacity-80"></i>
+      <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Mês</span>
+    </div>
+    <p class="text-3xl font-bold">{{ receita_mes|floatformat:0 }}</p>
+    <p class="text-sm opacity-80 mt-1">Receita do Mês</p>
+    <p class="text-xs opacity-70 mt-1">Previsto: {{ receita_prevista|floatformat:0 }}</p>
+  </div>
+  <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-5 rounded-xl shadow-lg text-white">
+    <div class="flex items-center justify-between mb-3">
+      <i class="fas fa-medal text-2xl opacity-80"></i>
+      <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Prontos</span>
+    </div>
+    <p class="text-3xl font-bold">{{ prontos_graduar|length }}</p>
+    <p class="text-sm opacity-80 mt-1">Para Graduar</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fas fa-clock text-red-500"></i> Mensalidades Atrasadas
+      </h2>
+      <a href="{% url 'core:mensalidades_atrasadas' %}" class="text-sm text-red-600 hover:text-red-700 font-medium">Ver todos</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for pag in top_atrasados %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user text-red-500 text-sm"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-800 truncate">{{ pag.aluno.nome }}</p>
+            <p class="text-xs text-gray-400">{{ pag.aluno.filial.nome|default:'-' }} · {{ pag.vencimento_em|date:"d/m/Y" }}</p>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0 ml-3">
+          <p class="text-sm font-semibold text-red-600">R$ {{ pag.aluno.valor_mensalidade|floatformat:2 }}</p>
+          <p class="text-xs text-gray-400">{{ pag.vencimento_em|timesince }} atrasado</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="px-6 py-10 text-center text-gray-400">
+        <i class="fas fa-check-circle text-3xl mb-2 text-green-400"></i>
+        <p>Nenhuma mensalidade atrasada!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fas fa-medal text-purple-500"></i> Próximas Graduações
+      </h2>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for item in prontos_graduar %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-trophy text-purple-500 text-sm"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-800 truncate">{{ item.aluno.nome }}</p>
+            <p class="text-xs text-gray-400">{{ item.aluno.faixa }} {{ item.aluno.grau }}° → {{ item.proxima_faixa }} {{ item.proximo_grau }}°</p>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0 ml-3">
+          <p class="text-xs font-medium text-purple-600">{{ item.meses_passados }} meses</p>
+          <p class="text-xs text-gray-400">{{ item.meses_necessarios }} meses necessário</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="px-6 py-10 text-center text-gray-400">
+        <i class="fas fa-calendar text-3xl mb-2 text-gray-300"></i>
+        <p>Nenhum aluno pronto para graduação</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fas fa-chart-line text-green-500"></i> Receita dos Últimos 6 Meses
+      </h2>
+    </div>
+    <div class="px-6 py-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-400 text-xs uppercase tracking-wider">
+            <th class="pb-2">Mês</th>
+            <th class="pb-2 text-right">Recebido</th>
+            <th class="pb-2 text-right w-32">Barra</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% with max_val=receita_meses.0.total %}
+          {% for item in receita_meses %}
+          <tr class="border-t border-gray-50">
+            <td class="py-2 text-gray-700 font-medium">{{ item.mes }}</td>
+            <td class="py-2 text-right font-semibold text-gray-800">R$ {{ item.total|floatformat:2 }}</td>
+            <td class="py-2">
+              <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
+                <div class="h-full rounded-full transition-all" style="width: {% if max_val %}{% widthratio item.total max_val 100 %}%{% else %}0%{% endif %}; background: linear-gradient(to right, #059669, #10b981); min-width: {% if item.total %}4px{% else %}0{% endif %};"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          {% endwith %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="font-semibold text-gray-800 flex items-center gap-2">
+        <i class="fas fa-user-plus text-blue-500"></i> Últimos Alunos Cadastrados
+      </h2>
+      <a href="{% url 'alunos:list' %}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Ver todos</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for aluno in ultimos_alunos %}
+      <div class="px-6 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user text-blue-500 text-sm"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-800 truncate">{{ aluno.nome }}</p>
+            <p class="text-xs text-gray-400">{{ aluno.faixa }} {{ aluno.grau }}° · {{ aluno.filial.nome|default:'-' }}</p>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 flex-shrink-0 ml-3">{{ aluno.created_at|date:"d/m/Y" }}</p>
+      </div>
+      {% empty %}
+      <div class="px-6 py-10 text-center text-gray-400">
+        <i class="fas fa-users text-3xl mb-2 text-gray-300"></i>
+        <p>Nenhum aluno cadastrado</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

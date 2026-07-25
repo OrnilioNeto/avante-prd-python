@@ -33,8 +33,17 @@
           {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'gerenciar_convites' %}
           <a href="{% url 'convites:list' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-envelope"></i> Convites</a>
           {% endif %}
+          {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_dashboard' %}
+          <a href="{% url 'core:professor_dashboard' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-chart-pie"></i> Painel</a>
+          {% endif %}
           {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_alunos' %}
           <a href="{% url 'alunos:list' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-users"></i> Alunos</a>
+          {% endif %}
+          {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_financeiro' %}
+          <a href="{% url 'core:financeiro' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-dollar-sign"></i> Financeiro</a>
+          {% endif %}
+          {% if user.is_superuser or user.role == 'super_admin' or user|has_perm:'ver_financeiro' %}
+          <a href="{% url 'core:mensalidades_atrasadas' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-exclamation-triangle"></i> Atrasados</a>
           {% endif %}
           {% if user.role == 'aluno' %}
           <a href="{% url 'core:minha_conta' %}" class="nav-link px-3 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-1.5"><i class="fas fa-user"></i> Minha Conta</a>

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mensalidades Atrasadas - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Mensalidades Atrasadas</h1>
+      <p class="text-gray-500 mt-1">Gerencie os pagamentos pendentes</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="text-right">
+        <p class="text-sm text-gray-500">Total em Atraso</p>
+        <p class="text-2xl font-bold text-red-600">R$ {{ total_atrasado|floatformat:2 }}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm text-gray-500">Alunos</p>
+        <p class="text-2xl font-bold text-gray-800">{{ qtd_atrasados }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-md border border-gray-100 mb-6">
+  <div class="p-4 border-b border-gray-100">
+    <form method="get" class="flex flex-wrap items-end gap-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Filial</label>
+        <select name="filial" class="input-focus border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <option value="">Todas</option>
+          {% for filial in filiais %}
+          <option value="{{ filial.pk }}" {% if filial_id == filial.pk %}selected{% endif %}>{{ filial.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Mês Referência</label>
+        <input type="month" name="mes" value="{{ mes_ref }}" class="input-focus border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <button type="submit" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+        <i class="fas fa-filter mr-1"></i> Filtrar
+      </button>
+      <a href="{% url 'core:mensalidades_atrasadas' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+        <i class="fas fa-times mr-1"></i> Limpar
+      </a>
+    </form>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <th class="px-6 py-3">Aluno</th>
+          <th class="px-6 py-3">Faixa</th>
+          <th class="px-6 py-3">Filial</th>
+          <th class="px-6 py-3">Vencimento</th>
+          <th class="px-6 py-3">Dias</th>
+          <th class="px-6 py-3 text-right">Valor</th>
+          <th class="px-6 py-3 text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for pag in pagamentos %}
+        <tr class="hover:bg-red-50 transition">
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-red-500 text-xs"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">{{ pag.aluno.nome }}</p>
+                <p class="text-xs text-gray-400">{{ pag.aluno.telefone|default:'-' }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-3 text-gray-600">{{ pag.aluno.faixa }} {{ pag.aluno.grau }}°</td>
+          <td class="px-6 py-3 text-gray-600">{{ pag.aluno.filial.nome|default:'-' }}</td>
+          <td class="px-6 py-3 text-gray-600">{{ pag.vencimento_em|date:"d/m/Y" }}</td>
+          <td class="px-6 py-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              {{ pag.vencimento_em|timesince }}
+            </span>
+          </td>
+          <td class="px-6 py-3 text-right font-semibold text-red-600">R$ {{ pag.aluno.valor_mensalidade|floatformat:2 }}</td>
+          <td class="px-6 py-3 text-right">
+            <a href="{% url 'alunos:detalhe' pag.aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium" target="_blank">
+              <i class="fas fa-eye mr-1"></i> Ver
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-6 py-16 text-center text-gray-400">
+            <i class="fas fa-check-circle text-4xl mb-3 text-green-400"></i>
+            <p class="text-lg font-medium text-gray-500">Nenhuma mensalidade atrasada!</p>
+            <p class="text-sm mt-1">Todos os pagamentos estão em dia.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pagamentos|length > 0 %}
+  <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 text-right">
+    <p class="text-sm text-gray-600"><strong>{{ pagamentos|length }}</strong> registro(s) encontrado(s)</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
