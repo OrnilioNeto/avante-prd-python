@@ -258,8 +258,12 @@ def professor_dashboard(request):
             )
             if meses_desde >= param.meses_para_proxima_graduacao:
                 faixa_idx = faixa_ordem.index(aluno.faixa) if aluno.faixa in faixa_ordem else -1
-                prox_faixa = faixa_ordem[faixa_idx + 1] if faixa_idx != -1 and faixa_idx < len(faixa_ordem) - 1 else aluno.faixa
-                prox_grau = 0 if prox_faixa != aluno.faixa else aluno.grau + 1
+                if aluno.grau >= 4 and faixa_idx != -1 and faixa_idx < len(faixa_ordem) - 1:
+                    prox_faixa = faixa_ordem[faixa_idx + 1]
+                    prox_grau = 0
+                else:
+                    prox_faixa = aluno.faixa
+                    prox_grau = aluno.grau + 1
                 prontos_graduar.append({
                     'aluno': aluno,
                     'proxima_faixa': prox_faixa,
