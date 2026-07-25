@@ -134,10 +134,14 @@ def professor_dashboard(request):
 
     ultimos_alunos = alunos.order_by('-created_at')[:8]
 
-    from dateutil.relativedelta import relativedelta
     receita_meses = []
     for i in range(5, -1, -1):
-        ref = mes_atual - relativedelta(months=i)
+        m = mes_atual.month - i
+        y = mes_atual.year
+        while m < 1:
+            m += 12
+            y -= 1
+        ref = date(y, m, 1)
         total = MensalidadePagamento.objects.filter(
             aluno__in=alunos,
             referencia_mes=ref,
@@ -246,10 +250,14 @@ def financeiro(request):
     hoje = date.today()
     mes_atual = date(hoje.year, hoje.month, 1)
 
-    from dateutil.relativedelta import relativedelta
     meses = []
     for i in range(11, -1, -1):
-        ref = mes_atual - relativedelta(months=i)
+        m = mes_atual.month - i
+        y = mes_atual.year
+        while m < 1:
+            m += 12
+            y -= 1
+        ref = date(y, m, 1)
         pagamentos = MensalidadePagamento.objects.filter(
             aluno__in=alunos,
             referencia_mes=ref,
