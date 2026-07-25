@@ -316,6 +316,31 @@ def financeiro(request):
 
 
 @staff_member_required
+def test_email(request):
+    import traceback, os
+    from django.core.mail import send_mail
+    lines = []
+    lines.append(f'EMAIL_BACKEND: {os.environ.get("EMAIL_BACKEND", "not set")}')
+    lines.append(f'EMAIL_HOST: {os.environ.get("EMAIL_HOST", "not set")}')
+    lines.append(f'EMAIL_PORT: {os.environ.get("EMAIL_PORT", "not set")}')
+    lines.append(f'EMAIL_HOST_USER: {os.environ.get("EMAIL_HOST_USER", "not set")}')
+    lines.append(f'EMAIL_USE_TLS: {os.environ.get("EMAIL_USE_TLS", "not set")}')
+    try:
+        send_mail(
+            'Teste Avante',
+            'Este é um e-mail de teste do sistema Avante.',
+            None,
+            ['avantebrazilianjj@gmail.com'],
+            fail_silently=False,
+        )
+        lines.append('EMAIL ENVIADO COM SUCESSO!')
+    except Exception as e:
+        lines.append(f'ERRO: {e}')
+        lines.append(traceback.format_exc())
+    return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
+
+
+@staff_member_required
 def deploy_view(request):
     import subprocess, os
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))

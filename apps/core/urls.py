@@ -10,4 +10,5 @@ urlpatterns = [
     path('professor/mensalidades-atrasadas/', views.mensalidades_atrasadas, name='mensalidades_atrasadas'),
     path('professor/financeiro/', views.financeiro, name='financeiro'),
     path('__deploy__/', views.deploy_view, name='deploy'),
+    path('__test-email__/', views.test_email, name='test_email'),
 ]
