@@ -335,30 +335,56 @@ def test_email(request):
     from apps.accounts.models import User
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
-    for port, use_tls, use_ssl in [(587, True, False), (465, False, True), (2525, True, False)]:
-        lines.append(f'--- Tentando Brevo porta {port} tls={use_tls} ssl={use_ssl} ---')
-        try:
-            backend = EmailBackend(
-                host='smtp-relay.brevo.com',
-                port=port,
-                username='avantebrazilianjj@gmail.com',
-                password='vIJXq0aOEC6SLb5z',
-                use_tls=use_tls,
-                use_ssl=use_ssl,
-                fail_silently=False,
-            )
-            email = EmailMessage(
-                'Teste Avante Brevo',
-                f'Este email foi enviado via Brevo SMTP porta {port}.',
-                'avante <avantebrazilianjj@gmail.com>',
-                [to_email],
-                connection=backend,
-            )
-            email.send()
-            lines.append(f'PORTA {port} FUNCIONOU!')
-            break
-        except Exception as e:
-            lines.append(f'Porta {port}: {e}')
+    import socket
+    lines.append(f'--- DNS smtp-relay.brevo.com ---')
+    try:
+        ips = socket.getaddrinfo('smtp-relay.brevo.com', 587)
+        for ip in ips[:3]:
+            lines.append(f'  {ip[4]}')
+    except Exception as e:
+        lines.append(f'DNS error: {e}')
+    lines.append(f'--- Tentando Brevo porta 587 ---')
+    try:
+        backend = EmailBackend(
+            host='smtp-relay.brevo.com',
+            port=587,
+            username='avantebrazilianjj@gmail.com',
+            password='vIJXq0aOEC6SLb5z',
+            use_tls=True,
+            fail_silently=False,
+        )
+        email = EmailMessage(
+            'Teste Avante Brevo',
+            'Teste via Brevo SMTP.',
+            'avante <avantebrazilianjj@gmail.com>',
+            [to_email],
+            connection=backend,
+        )
+        email.send()
+        lines.append('EMAIL VIA BREVO ENVIADO COM SUCESSO!')
+    except Exception as e:
+        lines.append(f'ERRO Brevo: {e}')
+    lines.append(f'--- Tentando Gmail porta 587 (verificar se SMTP funciona) ---')
+    try:
+        backend = EmailBackend(
+            host='smtp.gmail.com',
+            port=587,
+            username='avantebrazilianjj@gmail.com',
+            password='vIJXq0aOEC6SLb5z',
+            use_tls=True,
+            fail_silently=False,
+        )
+        email = EmailMessage(
+            'Teste Avante Gmail',
+            'Teste via Gmail SMTP com senha do Brevo.',
+            'avante <avantebrazilianjj@gmail.com>',
+            [to_email],
+            connection=backend,
+        )
+        email.send()
+        lines.append('EMAIL VIA GMAIL ENVIADO COM SUCESSO!')
+    except Exception as e:
+        lines.append(f'ERRO Gmail: {e}')
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
 
