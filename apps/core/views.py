@@ -526,7 +526,7 @@ print('Superuser admin/admin criado')
             output.append((r.stdout + r.stderr)[-800:])
         except Exception as e:
             output.append(f'Migrate error: {e}')
-        if request.GET.get('reset'):
+        if request.GET.get('reset') and not request.GET.get('noseed'):
             output.append('=== SEED ===')
             try:
                 r = subprocess.run([venv_python, manage_py, 'seed'], capture_output=True, text=True, cwd=repo_root)
