@@ -335,28 +335,30 @@ def test_email(request):
     from apps.accounts.models import User
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
-    lines.append('--- Tentando Brevo diretamente ---')
-    try:
-        backend = EmailBackend(
-            host='smtp-relay.brevo.com',
-            port=587,
-            username='avantebrazilianjj@gmail.com',
-            password='vIJXq0aOEC6SLb5z',
-            use_tls=True,
-            fail_silently=False,
-        )
-        email = EmailMessage(
-            'Teste Avante Brevo',
-            'Este email foi enviado via Brevo SMTP.',
-            'avante <avantebrazilianjj@gmail.com>',
-            [to_email],
-            connection=backend,
-        )
-        email.send()
-        lines.append('EMAIL VIA BREVO ENVIADO COM SUCESSO!')
-    except Exception as e:
-        lines.append(f'ERRO Brevo: {e}')
-        lines.append(traceback.format_exc())
+    for port, use_tls, use_ssl in [(587, True, False), (465, False, True), (2525, True, False)]:
+        lines.append(f'--- Tentando Brevo porta {port} tls={use_tls} ssl={use_ssl} ---')
+        try:
+            backend = EmailBackend(
+                host='smtp-relay.brevo.com',
+                port=port,
+                username='avantebrazilianjj@gmail.com',
+                password='vIJXq0aOEC6SLb5z',
+                use_tls=use_tls,
+                use_ssl=use_ssl,
+                fail_silently=False,
+            )
+            email = EmailMessage(
+                'Teste Avante Brevo',
+                f'Este email foi enviado via Brevo SMTP porta {port}.',
+                'avante <avantebrazilianjj@gmail.com>',
+                [to_email],
+                connection=backend,
+            )
+            email.send()
+            lines.append(f'PORTA {port} FUNCIONOU!')
+            break
+        except Exception as e:
+            lines.append(f'Porta {port}: {e}')
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
 
