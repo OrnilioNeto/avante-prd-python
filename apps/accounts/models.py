@@ -10,6 +10,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.ALUNO)
     cpf = models.CharField(max_length=14, unique=True, verbose_name='CPF')
+    must_change_password = models.BooleanField(default=True, verbose_name='Deve trocar a senha')
     filial = models.ForeignKey('filiais.Filial', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Filial')
     faixa = models.CharField(max_length=50, blank=True, verbose_name='Faixa')
     grau = models.IntegerField(default=0, verbose_name='Grau')
