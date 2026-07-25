@@ -52,10 +52,10 @@ def minha_conta(request):
     user = request.user
     aluno = get_object_or_404(Aluno, cpf=user.cpf)
     hoje = date.today()
+    from django.db.models import Exists, OuterRef, Sum
 
     pagamentos = MensalidadePagamento.objects.filter(aluno=aluno)
     ultimo_pagamento = pagamentos.order_by('-referencia_mes').first()
-    from django.db.models import Exists, OuterRef
     paid_for_same_month = MensalidadePagamento.objects.filter(
         aluno=OuterRef('aluno'),
         referencia_mes=OuterRef('referencia_mes'),
@@ -65,32 +65,96 @@ def minha_conta(request):
         pago_em__isnull=True, vencimento_em__lt=hoje
     ).exclude(Exists(paid_for_same_month))
     pagamentos_em_dia = pagamentos.filter(pago_em__isnull=False)
+    total_pago = pagamentos_em_dia.aggregate(total=Sum('valor'))['total'] or 0
 
     proximo_vencimento = None
-    if aluno.dia_vencimento:
-        mes = hoje.month
-        ano = hoje.year
-        if hoje.day > aluno.dia_vencimento:
-            mes += 1
-            if mes > 12:
-                mes = 1
-                ano += 1
-        from datetime import date
-        try:
-            proximo_vencimento = date(ano, mes, aluno.dia_vencimento)
-        except:
-            pass
+    dia_venc = aluno.dia_vencimento or 5
+    mes = hoje.month
+    ano = hoje.year
+    if hoje.day > dia_venc:
+        mes += 1
+        if mes > 12:
+            mes = 1
+            ano += 1
+    from calendar import monthrange
+    ultimo = monthrange(ano, mes)[1]
+    try:
+        proximo_vencimento = date(ano, mes, min(dia_venc, ultimo))
+    except:
+        pass
 
-    graduacoes = GraduacaoAluno.objects.filter(aluno=aluno)
+    graduacoes = GraduacaoAluno.objects.filter(aluno=aluno).order_by('-graduado_em')
+
+    dias_desde_inicio = (hoje - aluno.data_inicio).days if aluno.data_inicio else 0
+    meses_desde_ultima_grad = 0
+    ult_grad = aluno.data_ultima_graduacao or aluno.data_inicio
+    if ult_grad:
+        meses_desde_ultima_grad = (hoje.year - ult_grad.year) * 12 + (hoje.month - ult_grad.month)
+
+    prox_faixa = aluno.faixa
+    prox_grau = 0
+    progresso_grad = 0
+    from apps.parametros.models import GraduacaoParametro
+    FAIXAS_ORDER = ['Branca', 'Azul', 'Roxa', 'Marrom', 'Preta']
+    try:
+        param = GraduacaoParametro.objects.get(faixa=aluno.faixa, grau=aluno.grau, ativo=True)
+        progresso_grad = min(100, int((meses_desde_ultima_grad / param.meses_para_proxima_graduacao) * 100))
+        if aluno.grau >= 4:
+            idx = FAIXAS_ORDER.index(aluno.faixa) if aluno.faixa in FAIXAS_ORDER else -1
+            if idx != -1 and idx < len(FAIXAS_ORDER) - 1:
+                prox_faixa = FAIXAS_ORDER[idx + 1]
+                prox_grau = 0
+            else:
+                prox_faixa = aluno.faixa
+                prox_grau = aluno.grau
+        else:
+            prox_faixa = aluno.faixa
+            prox_grau = aluno.grau + 1
+    except GraduacaoParametro.DoesNotExist:
+        param = None
+
+    xp = dias_desde_inicio * 10 + graduacoes.count() * 500 + pagamentos_em_dia.count() * 50
+    nivel = xp // 1000 + 1
+    xp_proximo_nivel = nivel * 1000
+    xp_atual = xp
+    xp_progresso = min(100, int((xp_atual % 1000) / 1000 * 100)) if xp_atual > 0 else 0
+
+    todos_alunos = Aluno.objects.filter(status='ativo')
+    ranking_data = []
+    for a in todos_alunos:
+        a_pags = MensalidadePagamento.objects.filter(aluno=a, pago_em__isnull=False).count()
+        a_grads = GraduacaoAluno.objects.filter(aluno=a).count()
+        a_dias = (hoje - a.data_inicio).days if a.data_inicio else 0
+        a_xp = a_dias * 10 + a_grads * 500 + a_pags * 50
+        ranking_data.append((a.pk, a.nome, a_xp))
+    ranking_data.sort(key=lambda x: x[2], reverse=True)
+    posicao = next((i+1 for i, (pk, _, _) in enumerate(ranking_data) if pk == aluno.pk), None)
+    top3 = ranking_data[:3]
+    ranking_count = len(ranking_data)
 
     return render(request, 'core/minha_conta.html', {
         'aluno': aluno,
-        'pagamentos': pagamentos,
+        'pagamentos': pagamentos.order_by('-referencia_mes'),
         'ultimo_pagamento': ultimo_pagamento,
         'pagamentos_em_atraso': pagamentos_em_atraso,
         'pagamentos_em_dia': pagamentos_em_dia,
+        'total_pago': total_pago,
         'proximo_vencimento': proximo_vencimento,
         'graduacoes': graduacoes,
+        'dias_desde_inicio': dias_desde_inicio,
+        'meses_desde_ultima_grad': meses_desde_ultima_grad,
+        'param': param,
+        'progresso_grad': progresso_grad,
+        'prox_faixa': prox_faixa,
+        'prox_grau': prox_grau,
+        'nivel': nivel,
+        'xp': xp,
+        'xp_proximo_nivel': xp_proximo_nivel,
+        'xp_progresso': xp_progresso,
+        'posicao': posicao,
+        'top3': top3,
+        'ranking_count': ranking_count,
+        'FAIXAS_ORDER': FAIXAS_ORDER,
     })
 
 
