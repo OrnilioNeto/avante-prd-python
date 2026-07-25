@@ -213,60 +213,56 @@ def professor_dashboard(request):
 
 @login_required
 def mensalidades_atrasadas(request):
-    import traceback
-    try:
-        user = request.user
-        if user.role not in ('professor', 'super_admin') and not user.is_superuser:
-            from django.http import Http404; raise Http404()
-        from django.db.models import Sum, Exists, OuterRef
+    user = request.user
+    if user.role not in ('professor', 'super_admin') and not user.is_superuser:
+        from django.http import Http404; raise Http404()
+    from django.db.models import Sum, Exists, OuterRef
 
-        alunos = _get_alunos_queryset(user)
-        hoje = date.today()
+    alunos = _get_alunos_queryset(user)
+    hoje = date.today()
 
-        paid_for_same_month = MensalidadePagamento.objects.filter(
-            aluno=OuterRef('aluno'),
-            referencia_mes=OuterRef('referencia_mes'),
-            pago_em__isnull=False,
-        )
-        pagamentos = MensalidadePagamento.objects.filter(
-            aluno__in=alunos,
-            pago_em__isnull=True,
-            vencimento_em__lt=hoje,
-        ).exclude(Exists(paid_for_same_month)).select_related('aluno', 'aluno__filial').order_by('vencimento_em')
+    paid_for_same_month = MensalidadePagamento.objects.filter(
+        aluno=OuterRef('aluno'),
+        referencia_mes=OuterRef('referencia_mes'),
+        pago_em__isnull=False,
+    )
+    pagamentos = MensalidadePagamento.objects.filter(
+        aluno__in=alunos,
+        pago_em__isnull=True,
+        vencimento_em__lt=hoje,
+    ).exclude(Exists(paid_for_same_month)).select_related('aluno', 'aluno__filial').order_by('vencimento_em')
 
-        filial_id = request.GET.get('filial')
-        mes_ref = request.GET.get('mes')
+    filial_id = request.GET.get('filial')
+    mes_ref = request.GET.get('mes')
 
-        if filial_id:
-            pagamentos = pagamentos.filter(aluno__filial_id=filial_id)
-        if mes_ref:
-            try:
-                ano, mes = int(mes_ref[:4]), int(mes_ref[5:7])
-                pagamentos = pagamentos.filter(
-                    referencia_mes__year=ano, referencia_mes__month=mes
-                )
-            except (ValueError, IndexError):
-                pass
+    if filial_id:
+        pagamentos = pagamentos.filter(aluno__filial_id=filial_id)
+    if mes_ref:
+        try:
+            ano, mes = int(mes_ref[:4]), int(mes_ref[5:7])
+            pagamentos = pagamentos.filter(
+                referencia_mes__year=ano, referencia_mes__month=mes
+            )
+        except (ValueError, IndexError):
+            pass
 
-        total_atrasado = pagamentos.aggregate(total=Sum('aluno__valor_mensalidade'))['total'] or 0
-        qtd_atrasados = pagamentos.values('aluno').distinct().count()
+    total_atrasado = pagamentos.aggregate(total=Sum('aluno__valor_mensalidade'))['total'] or 0
+    qtd_atrasados = pagamentos.values('aluno').distinct().count()
 
-        from apps.filiais.models import Filial
-        filiais = Filial.objects.filter(
-            pk__in=alunos.values_list('filial', flat=True).distinct()
-        )
+    from apps.filiais.models import Filial
+    filiais = Filial.objects.filter(
+        pk__in=alunos.values_list('filial', flat=True).distinct()
+    )
 
-        return render(request, 'core/mensalidades_atrasadas.html', {
-            'pagamentos': pagamentos[:100],
-            'total_atrasado': total_atrasado,
-            'qtd_atrasados': qtd_atrasados,
-            'filiais': filiais,
-            'filial_id': int(filial_id) if filial_id else None,
-            'mes_ref': mes_ref,
-            'hoje': hoje,
-        })
-    except Exception as e:
-        return HttpResponse(f'<pre>ERRO: {e}\n{traceback.format_exc()}</pre>')
+    return render(request, 'core/mensalidades_atrasadas.html', {
+        'pagamentos': pagamentos[:100],
+        'total_atrasado': total_atrasado,
+        'qtd_atrasados': qtd_atrasados,
+        'filiais': filiais,
+        'filial_id': int(filial_id) if filial_id else None,
+        'mes_ref': mes_ref,
+        'hoje': hoje,
+    })
 
 
 @login_required

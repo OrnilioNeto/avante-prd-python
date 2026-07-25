@@ -82,7 +82,7 @@
           </td>
           <td class="px-6 py-3 text-right font-semibold text-red-600">R$ {{ pag.aluno.valor_mensalidade|floatformat:2 }}</td>
           <td class="px-6 py-3 text-right">
-            <a href="{% url 'alunos:detalhe' pag.aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium" target="_blank">
+            <a href="{% url 'alunos:detail' pag.aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium" target="_blank">
               <i class="fas fa-eye mr-1"></i> Ver
             </a>
           </td>
