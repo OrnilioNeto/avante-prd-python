@@ -117,6 +117,20 @@ def run():
         if created and modalidade:
             aluno.modalidades = [modalidade.pk]
             aluno.save(update_fields=['modalidades'])
+        nome_parts = data['nome'].split()
+        user, _ = User.objects.get_or_create(
+            username=cpf,
+            defaults=dict(
+                cpf=cpf,
+                email=data['email'],
+                first_name=nome_parts[0] if nome_parts else data['nome'],
+                last_name=' '.join(nome_parts[1:]) if len(nome_parts) > 1 else '',
+                role='aluno',
+                must_change_password=True,
+            ),
+        )
+        user.set_password(cpf)
+        user.save(update_fields=['password'])
 
     return dict(filial=filial.nome, professor=professor_user.get_full_name(), alunos=5)
 
