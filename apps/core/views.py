@@ -319,7 +319,8 @@ def financeiro(request):
 def test_email(request):
     import traceback, os
     from django.conf import settings as s
-    from django.core.mail import send_mail
+    from django.core.mail import send_mail, EmailMessage
+    from django.core.mail.backends.smtp import EmailBackend
     from pathlib import Path
     lines = []
     lines.append(f'os.environ EMAIL_BACKEND: {os.environ.get("EMAIL_BACKEND", "not set")}')
@@ -329,32 +330,32 @@ def test_email(request):
     lines.append(f'settings EMAIL_HOST_USER: {s.EMAIL_HOST_USER}')
     lines.append(f'settings EMAIL_USE_TLS: {s.EMAIL_USE_TLS}')
     lines.append(f'settings DEFAULT_FROM_EMAIL: {s.DEFAULT_FROM_EMAIL}')
-    # Read actual .env from disk
     env_path = Path(__file__).resolve().parent.parent.parent / '.env'
-    if env_path.exists():
-        lines.append(f'--- .env content ({env_path}) ---')
-        for line in env_path.read_text().splitlines():
-            if 'PASSWORD' in line:
-                lines.append('EMAIL_HOST_PASSWORD=***')
-            else:
-                lines.append(line)
-    else:
-        lines.append(f'.env NOT FOUND at {env_path}')
     to_email = request.GET.get('to', 'avantebrazilianjj@gmail.com')
     from apps.accounts.models import User
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
+    lines.append('--- Tentando Brevo diretamente ---')
     try:
-        send_mail(
-            'Teste Avante',
-            'Este é um e-mail de teste do sistema Avante.',
-            None,
-            [to_email],
+        backend = EmailBackend(
+            host='smtp-relay.brevo.com',
+            port=587,
+            username='avantebrazilianjj@gmail.com',
+            password='vIJXq0aOEC6SLb5z',
+            use_tls=True,
             fail_silently=False,
         )
-        lines.append('EMAIL ENVIADO COM SUCESSO!')
+        email = EmailMessage(
+            'Teste Avante Brevo',
+            'Este email foi enviado via Brevo SMTP.',
+            'avante <avantebrazilianjj@gmail.com>',
+            [to_email],
+            connection=backend,
+        )
+        email.send()
+        lines.append('EMAIL VIA BREVO ENVIADO COM SUCESSO!')
     except Exception as e:
-        lines.append(f'ERRO: {e}')
+        lines.append(f'ERRO Brevo: {e}')
         lines.append(traceback.format_exc())
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
