@@ -43,6 +43,40 @@ class GraduacaoParametro(models.Model):
         return f'{self.faixa} {self.grau} - {self.meses_para_proxima_graduacao} meses'
 
 
+PERMISSOES_CHOICES = [
+    ('ver_alunos', 'Ver Alunos'),
+    ('criar_alunos', 'Criar Alunos'),
+    ('editar_alunos', 'Editar Alunos'),
+    ('ver_financeiro', 'Ver Financeiro'),
+    ('registrar_pagamento', 'Registrar Pagamento'),
+    ('excluir_pagamento', 'Excluir Pagamento'),
+    ('registrar_graduacao', 'Registrar Graduação'),
+    ('ver_relatorios', 'Ver Relatórios'),
+    ('gerenciar_convites', 'Gerenciar Convites'),
+    ('gerenciar_parametros', 'Gerenciar Parâmetros'),
+    ('ver_dashboard', 'Ver Dashboard'),
+]
+
+
+class PerfilAcesso(models.Model):
+    nome = models.CharField(max_length=100, verbose_name='Nome do Perfil')
+    permissoes = models.JSONField(default=list, blank=True, verbose_name='Permissões')
+    is_admin = models.BooleanField(default=False, verbose_name='Acesso Administrativo')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Perfil de Acesso'
+        verbose_name_plural = 'Perfis de Acesso'
+
+    def __str__(self):
+        return self.nome
+
+    def has_permissao(self, permissao):
+        if self.is_admin:
+            return True
+        return permissao in self.permissoes
+
+
 class AcademiaParametro(models.Model):
     secao = models.CharField(max_length=100, verbose_name='Secao')
     titulo = models.CharField(max_length=150, verbose_name='Titulo')

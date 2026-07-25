@@ -6,6 +6,27 @@ class AdminRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser or self.request.user.role == 'super_admin'
 
 
+class PermissaoMixin(UserPassesTestMixin):
+    permission_required = None
+
+    def test_func(self):
+        user = self.request.user
+        if user.is_superuser or user.role == 'super_admin':
+            return True
+        if user.role == 'professor':
+            try:
+                profile = user.professor_profile
+                if profile.perfil_acesso and profile.perfil_acesso.is_admin:
+                    return True
+                if self.permission_required:
+                    return profile.has_permissao(self.permission_required)
+                return True
+            except:
+                pass
+            return False
+        return False
+
+
 class RoleFilterMixin:
     def get_queryset(self):
         qs = super().get_queryset()
@@ -33,15 +54,6 @@ class RoleFilterMixin:
         return qs.none()
 
 
-class ProfessorAccessMixin(UserPassesTestMixin):
-    def test_func(self):
-        if self.request.user.is_superuser or self.request.user.role == 'super_admin':
-            return True
-        if self.request.user.role == 'professor':
-            return True
-        return False
-
-
 class RoleFilterDetailMixin:
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
@@ -60,4 +72,3 @@ class RoleFilterDetailMixin:
                 return obj
         from django.http import Http404
         raise Http404
-

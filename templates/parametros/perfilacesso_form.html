@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Perfil de Acesso - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">{% if object %}Editar{% else %}Novo{% endif %} Perfil de Acesso</h1>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 max-w-2xl">
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">Nome do Perfil</label>
+      <input type="text" name="nome" value="{{ object.nome|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input type="checkbox" name="is_admin" value="true" id="id_is_admin"
+        onchange="document.getElementById('permissoes_section').classList.toggle('opacity-50', this.checked)"
+        {% if object.is_admin %}checked{% endif %}
+        class="rounded border-gray-300 text-green-600 focus:ring-green-500 w-5 h-5">
+      <label for="id_is_admin" class="text-sm font-medium text-gray-700">Acesso Administrativo (acesso a tudo)</label>
+    </div>
+
+    <div id="permissoes_section" class="{% if object.is_admin %}opacity-50{% endif %}">
+      <label class="block text-sm font-semibold text-gray-700 mb-2">Permissões Específicas</label>
+      <div class="grid grid-cols-2 gap-3">
+        {% for key, label in permissoes_choices %}
+        <label class="flex items-center gap-2 p-2 border rounded-lg hover:bg-green-50 cursor-pointer">
+          <input type="checkbox" name="permissoes" value="{{ key }}"
+            {% if key in permissoes_selecionadas %}checked{% endif %}
+            class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+          <span class="text-sm">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-500 transition font-medium">
+      <i class="fas fa-check"></i> Salvar
+    </button>
+    <a href="{% url 'parametros:perfil_list' %}" class="ml-2 text-gray-500 hover:text-gray-700">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

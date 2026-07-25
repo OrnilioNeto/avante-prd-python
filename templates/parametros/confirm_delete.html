@@ -9,7 +9,7 @@
       {% csrf_token %}
       <div class="flex items-center justify-center gap-3">
         <button type="submit" class="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-500 font-medium transition"><i class="fas fa-trash"></i> Excluir</button>
-        <a href="{% url 'parametros:list' %}" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 font-medium transition"><i class="fas fa-times"></i> Cancelar</a>
+        <a href="{% if cancel_url %}{{ cancel_url }}{% else %}{% url 'parametros:list' %}{% endif %}" class="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 font-medium transition"><i class="fas fa-times"></i> Cancelar</a>
       </div>
     </form>
   </div>

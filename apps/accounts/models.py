@@ -20,5 +20,17 @@ class User(AbstractUser):
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
 
+    def has_permissao(self, permissao):
+        if self.is_superuser or self.role == 'super_admin':
+            return True
+        if self.role == 'professor':
+            try:
+                profile = self.professor_profile
+                if profile.perfil_acesso:
+                    return profile.has_permissao(permissao)
+            except:
+                pass
+        return self.role == 'aluno' and permissao == 'ver_alunos'
+
     def __str__(self):
         return f'{self.get_full_name()} ({self.get_role_display()})'

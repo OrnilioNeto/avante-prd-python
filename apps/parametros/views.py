@@ -2,11 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from .models import Modalidade, HorarioTreino, GraduacaoParametro, AcademiaParametro
-from apps.core.mixins import AdminRequiredMixin
+from .models import Modalidade, HorarioTreino, GraduacaoParametro, AcademiaParametro, PerfilAcesso
+from apps.core.mixins import PermissaoMixin
 
 
-class ParametroListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
+class ParametroListView(LoginRequiredMixin, PermissaoMixin, ListView):
+    permission_required = 'gerenciar_parametros'
     template_name = 'parametros/parametro_list.html'
 
     def get_queryset(self):
@@ -21,7 +22,8 @@ class ParametroListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
         return context
 
 
-class ModalidadeCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+class ModalidadeCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
+    permission_required = 'gerenciar_parametros'
     model = Modalidade
     fields = ['nome']
     success_url = reverse_lazy('parametros:list')
@@ -32,13 +34,15 @@ class ModalidadeCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ModalidadeDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+class ModalidadeDeleteView(LoginRequiredMixin, PermissaoMixin, DeleteView):
+    permission_required = 'gerenciar_parametros'
     model = Modalidade
     success_url = reverse_lazy('parametros:list')
     template_name = 'parametros/confirm_delete.html'
 
 
-class HorarioCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+class HorarioCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
+    permission_required = 'gerenciar_parametros'
     model = HorarioTreino
     fields = ['descricao']
     success_url = reverse_lazy('parametros:list')
@@ -49,13 +53,15 @@ class HorarioCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class HorarioDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+class HorarioDeleteView(LoginRequiredMixin, PermissaoMixin, DeleteView):
+    permission_required = 'gerenciar_parametros'
     model = HorarioTreino
     success_url = reverse_lazy('parametros:list')
     template_name = 'parametros/confirm_delete.html'
 
 
-class GraduacaoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+class GraduacaoCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
+    permission_required = 'gerenciar_parametros'
     model = GraduacaoParametro
     fields = ['faixa', 'grau', 'meses_para_proxima_graduacao']
     success_url = reverse_lazy('parametros:list')
@@ -66,13 +72,15 @@ class GraduacaoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class GraduacaoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+class GraduacaoDeleteView(LoginRequiredMixin, PermissaoMixin, DeleteView):
+    permission_required = 'gerenciar_parametros'
     model = GraduacaoParametro
     success_url = reverse_lazy('parametros:list')
     template_name = 'parametros/confirm_delete.html'
 
 
-class AcademiaParametroCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+class AcademiaParametroCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
+    permission_required = 'gerenciar_parametros'
     model = AcademiaParametro
     fields = ['secao', 'titulo', 'tipo', 'idade_min', 'idade_max', 'conteudo', 'ordem']
     success_url = reverse_lazy('parametros:list')
@@ -83,7 +91,67 @@ class AcademiaParametroCreateView(LoginRequiredMixin, AdminRequiredMixin, Create
         return super().form_valid(form)
 
 
-class AcademiaParametroDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+class AcademiaParametroDeleteView(LoginRequiredMixin, PermissaoMixin, DeleteView):
+    permission_required = 'gerenciar_parametros'
     model = AcademiaParametro
     success_url = reverse_lazy('parametros:list')
     template_name = 'parametros/confirm_delete.html'
+
+
+# ========== PerfilAcesso CRUD ==========
+
+class PerfilAcessoListView(LoginRequiredMixin, PermissaoMixin, ListView):
+    permission_required = 'gerenciar_parametros'
+    model = PerfilAcesso
+    template_name = 'parametros/perfilacesso_list.html'
+    context_object_name = 'perfis'
+
+
+class PerfilAcessoCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
+    permission_required = 'gerenciar_parametros'
+    model = PerfilAcesso
+    template_name = 'parametros/perfilacesso_form.html'
+    fields = ['nome', 'permissoes', 'is_admin']
+    success_url = reverse_lazy('parametros:perfil_list')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from .models import PERMISSOES_CHOICES
+        ctx['permissoes_choices'] = PERMISSOES_CHOICES
+        ctx['permissoes_selecionadas'] = []
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.permissoes = self.request.POST.getlist('permissoes')
+        return super().form_valid(form)
+
+
+class PerfilAcessoUpdateView(LoginRequiredMixin, PermissaoMixin, UpdateView):
+    permission_required = 'gerenciar_parametros'
+    model = PerfilAcesso
+    template_name = 'parametros/perfilacesso_form.html'
+    fields = ['nome', 'permissoes', 'is_admin']
+    success_url = reverse_lazy('parametros:perfil_list')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from .models import PERMISSOES_CHOICES
+        ctx['permissoes_choices'] = PERMISSOES_CHOICES
+        ctx['permissoes_selecionadas'] = self.object.permissoes or []
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.permissoes = self.request.POST.getlist('permissoes')
+        return super().form_valid(form)
+
+
+class PerfilAcessoDeleteView(LoginRequiredMixin, PermissaoMixin, DeleteView):
+    permission_required = 'gerenciar_parametros'
+    model = PerfilAcesso
+    success_url = reverse_lazy('parametros:perfil_list')
+    template_name = 'parametros/confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['cancel_url'] = reverse_lazy('parametros:perfil_list')
+        return ctx

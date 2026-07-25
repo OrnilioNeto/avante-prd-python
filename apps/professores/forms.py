@@ -13,9 +13,10 @@ class ProfessorForm(forms.ModelForm):
 
     class Meta:
         model = Professor
-        fields = ['filiais', 'faixa', 'grau']
+        fields = ['filiais', 'perfil_acesso', 'faixa', 'grau']
         labels = {
             'filiais': 'Filiais',
+            'perfil_acesso': 'Perfil de Acesso',
             'faixa': 'Faixa',
             'grau': 'Grau',
         }

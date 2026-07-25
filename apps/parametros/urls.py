@@ -13,4 +13,8 @@ urlpatterns = [
     path('graduacao/<int:pk>/excluir/', views.GraduacaoDeleteView.as_view(), name='graduacao_delete'),
     path('academia/criar/', views.AcademiaParametroCreateView.as_view(), name='academia_create'),
     path('academia/<int:pk>/excluir/', views.AcademiaParametroDeleteView.as_view(), name='academia_delete'),
+    path('perfis/', views.PerfilAcessoListView.as_view(), name='perfil_list'),
+    path('perfis/criar/', views.PerfilAcessoCreateView.as_view(), name='perfil_create'),
+    path('perfis/<int:pk>/editar/', views.PerfilAcessoUpdateView.as_view(), name='perfil_update'),
+    path('perfis/<int:pk>/excluir/', views.PerfilAcessoDeleteView.as_view(), name='perfil_delete'),
 ]
