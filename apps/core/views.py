@@ -471,6 +471,15 @@ def deploy_view(request):
         output.append(r.stdout + r.stderr)
         r = subprocess.run(['git', 'pull'], capture_output=True, text=True, cwd=repo_root)
         output.append(r.stdout + r.stderr)
+        output.append('=== PIP INSTALL ===')
+        venv_pip = os.path.join(repo_root, 'venv', 'bin', 'pip')
+        if os.path.exists(venv_pip):
+            r = subprocess.run([venv_pip, 'install', '-r', os.path.join(repo_root, 'requirements.txt')], capture_output=True, text=True, cwd=repo_root)
+            output.append((r.stdout + r.stderr)[-500:])
+        else:
+            output.append('venv pip nao encontrado, tentando pip3')
+            r = subprocess.run(['pip3', 'install', '-r', os.path.join(repo_root, 'requirements.txt')], capture_output=True, text=True, cwd=repo_root)
+            output.append((r.stdout + r.stderr)[-500:])
         if request.GET.get('reset'):
             output.append('=== RESET DB ===')
             call_command('flush', '--noinput')

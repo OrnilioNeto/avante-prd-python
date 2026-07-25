@@ -11,7 +11,6 @@ from .models import Aluno, MensalidadePagamento, GraduacaoAluno, Presenca
 from apps.accounts.models import User
 from apps.parametros.models import Modalidade, HorarioTreino
 from apps.core.mixins import RoleFilterMixin, RoleFilterDetailMixin, PermissaoMixin
-import qrcode
 from io import BytesIO
 import base64
 
@@ -189,6 +188,7 @@ class GraduacaoCreateView(LoginRequiredMixin, PermissaoMixin, View):
 
 class GerarQRCodeView(LoginRequiredMixin, View):
     def get(self, request):
+        import qrcode
         qr_url = request.build_absolute_uri('/presenca/')
         img = qrcode.make(qr_url)
         buf = BytesIO()
