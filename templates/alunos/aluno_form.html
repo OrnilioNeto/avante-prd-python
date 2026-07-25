@@ -50,10 +50,12 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Filial</label>
         <select name="filial" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+          <option value="">Selecione...</option>
           {% for value, label in form.filial.field.choices %}
           <option value="{{ value }}" {% if form.filial.value|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
+        {% if form.filial.errors %}<p class="text-red-500 text-xs mt-1">{{ form.filial.errors.0 }}</p>{% endif %}
       </div>
 
       <div>
@@ -64,6 +66,7 @@
           <option value="{{ h.id }}" {% if form.horario_treino.value|stringformat:'s' == h.id|stringformat:'s' %}selected{% endif %}>{{ h.descricao }}</option>
           {% endfor %}
         </select>
+        {% if form.horario_treino.errors %}<p class="text-red-500 text-xs mt-1">{{ form.horario_treino.errors.0 }}</p>{% endif %}
       </div>
 
       <div class="md:col-span-2">

@@ -28,7 +28,7 @@ class Aluno(models.Model):
     responsavel_telefone = models.CharField(max_length=20, blank=True, verbose_name='Telefone do Responsável')
     responsavel_telefone2 = models.CharField(max_length=20, blank=True, verbose_name='Telefone 2 do Responsável')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ATIVO)
-    filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, verbose_name='Filial')
+    filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Filial')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
