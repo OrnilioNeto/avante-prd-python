@@ -270,8 +270,23 @@ def cartao_atleta(request, aluno_id):
 
     graduacoes = aluno.graduacoes.all()
 
+    user = User.objects.filter(cpf=aluno.cpf).first()
+    qr_data_url = None
+    perfil_url = None
+    if user:
+        perfil_url = request.build_absolute_uri(f'/rede/perfil/{user.pk}/')
+        import qrcode
+        from io import BytesIO
+        import base64
+        img = qrcode.make(perfil_url)
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        qr_data_url = f'data:image/png;base64,{base64.b64encode(buf.read()).decode()}'
+
     return render(request, 'alunos/cartao_atleta.html', {
         'aluno': aluno,
+        'user': user,
         'assiduidade': assiduidade,
         'total_presencas': total_presencas,
         'total_xp': total_xp,
@@ -284,6 +299,8 @@ def cartao_atleta(request, aluno_id):
         'total_pago': total_pago,
         'hoje': hoje,
         'faixas': faixa_ordem,
+        'qr_data_url': qr_data_url,
+        'perfil_url': perfil_url,
     })
 
 
