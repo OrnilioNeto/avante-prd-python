@@ -1,12 +1,8 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Filial
-
-
-class AdminRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.role == 'super_admin'
+from apps.core.mixins import AdminRequiredMixin
 
 
 class FilialListView(LoginRequiredMixin, AdminRequiredMixin, ListView):

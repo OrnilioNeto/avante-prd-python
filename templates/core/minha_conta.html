@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Minha Conta - Avante{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <div class="flex items-center gap-4">
+    <div class="relative">
+      {% if user.profile_photo %}
+        <img src="{{ user.profile_photo.url }}" alt="Foto" class="h-20 w-20 rounded-full object-cover border-4 border-green-200 shadow-md">
+      {% else %}
+        <div class="h-20 w-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-green-200">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+      {% endif %}
+    </div>
+    <div>
+      <h1 class="text-2xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
+      <p class="text-gray-500 flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+          {% if aluno.faixa == 'Branca' %}bg-gray-200 text-gray-700
+          {% elif aluno.faixa == 'Azul' %}bg-blue-200 text-blue-700
+          {% elif aluno.faixa == 'Roxa' %}bg-purple-200 text-purple-700
+          {% elif aluno.faixa == 'Marrom' %}bg-amber-200 text-amber-700
+          {% elif aluno.faixa == 'Preta' %}bg-gray-900 text-white
+          {% else %}bg-green-200 text-green-700{% endif %}">
+          {{ aluno.faixa }} {{ aluno.grau }}°
+        </span>
+        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+          {% if aluno.status == 'ativo' %}bg-green-100 text-green-700
+          {% elif aluno.status == 'inativo' %}bg-red-100 text-red-700
+          {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+          {{ aluno.get_status_display }}
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-xl shadow-lg text-white">
+    <p class="text-2xl font-bold">{{ pagamentos_em_dia.count }}</p>
+    <p class="text-sm opacity-80">Pagamentos em Dia</p>
+  </div>
+  <div class="bg-gradient-to-br from-red-500 to-red-600 p-4 rounded-xl shadow-lg text-white">
+    <p class="text-2xl font-bold">{{ pagamentos_em_atraso.count }}</p>
+    <p class="text-sm opacity-80">Em Atraso</p>
+  </div>
+  <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-xl shadow-lg text-white">
+    <p class="text-2xl font-bold">{{ graduacoes.count }}</p>
+    <p class="text-sm opacity-80">Graduações</p>
+  </div>
+  <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-xl shadow-lg text-white">
+    <p class="text-lg font-bold">{% if proximo_vencimento %}{{ proximo_vencimento|date:"d/m/Y" }}{% else %}-{% endif %}</p>
+    <p class="text-sm opacity-80">Próximo Vencimento</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-1 space-y-6">
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-user text-blue-600"></i> Meus Dados</h2>
+      <div class="space-y-2 text-sm">
+        <p><strong>CPF:</strong> {{ aluno.cpf }}</p>
+        <p><strong>E-mail:</strong> {{ aluno.email|default:"-" }}</p>
+        <p><strong>Telefone:</strong> {{ aluno.telefone|default:"-" }}</p>
+        <p><strong>Data Nasc.:</strong> {{ aluno.data_nascimento|date:"d/m/Y" }}</p>
+        <p><strong>Data Início:</strong> {{ aluno.data_inicio|date:"d/m/Y" }}</p>
+        <p><strong>Filial:</strong> {{ aluno.filial.nome|default:"-" }}</p>
+        <p><strong>Horário Treino:</strong> {{ aluno.horario_treino.descricao|default:"-" }}</p>
+        <p><strong>Valor Mensalidade:</strong> {% if aluno.valor_mensalidade %}R$ {{ aluno.valor_mensalidade }}{% else %}-{% endif %}</p>
+        <p><strong>Dia Vencimento:</strong> Dia {{ aluno.dia_vencimento|default:"-" }}</p>
+        <p><strong>Modalidades:</strong>
+          {% if aluno.modalidades %}
+            {% for m_id in aluno.modalidades %}
+              <span class="inline-block bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">{{ m_id }}</span>
+            {% endfor %}
+          {% else %}-{% endif %}
+        </p>
+      </div>
+    </div>
+
+    {% if aluno.tem_responsavel %}
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-users text-orange-600"></i> Responsável</h2>
+      <div class="space-y-2 text-sm">
+        <p><strong>Nome:</strong> {{ aluno.responsavel_nome|default:"-" }}</p>
+        <p><strong>CPF:</strong> {{ aluno.responsavel_cpf|default:"-" }}</p>
+        <p><strong>Telefone:</strong> {{ aluno.responsavel_telefone|default:"-" }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-credit-card text-green-600"></i> Último Pagamento</h2>
+      {% if ultimo_pagamento %}
+        <div class="text-sm">
+          <p><strong>Mês:</strong> {{ ultimo_pagamento.referencia_mes|date:"m/Y" }}</p>
+          <p><strong>Valor:</strong> R$ {{ ultimo_pagamento.valor }}</p>
+          <p><strong>Vencimento:</strong> {{ ultimo_pagamento.vencimento_em|date:"d/m/Y" }}</p>
+          <p><strong>Pago em:</strong> {{ ultimo_pagamento.pago_em|date:"d/m/Y"|default:"-" }}</p>
+        </div>
+      {% else %}
+        <p class="text-gray-400 text-sm">Nenhum pagamento registrado.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="lg:col-span-2 space-y-6">
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-credit-card text-green-600"></i> Histórico de Pagamentos</h2>
+      {% if pagamentos %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Mês Ref.</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Vencimento</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Pago Em</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Valor</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pagamentos %}
+            <tr class="border-t hover:bg-gray-50">
+              <td class="px-3 py-2">{{ p.referencia_mes|date:"m/Y" }}</td>
+              <td class="px-3 py-2">{{ p.vencimento_em|date:"d/m/Y" }}</td>
+              <td class="px-3 py-2">{{ p.pago_em|date:"d/m/Y"|default:"-" }}</td>
+              <td class="px-3 py-2">R$ {{ p.valor }}</td>
+              <td class="px-3 py-2">
+                {% if p.pago_em %}
+                  <span class="text-green-600 text-xs font-medium bg-green-100 px-2 py-0.5 rounded-full"><i class="fas fa-check-circle"></i> Pago</span>
+                {% elif p.vencimento_em < hoje %}
+                  <span class="text-red-600 text-xs font-medium bg-red-100 px-2 py-0.5 rounded-full"><i class="fas fa-exclamation-circle"></i> Atrasado</span>
+                {% else %}
+                  <span class="text-yellow-600 text-xs font-medium bg-yellow-100 px-2 py-0.5 rounded-full"><i class="fas fa-clock"></i> Pendente</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-gray-400 text-sm">Nenhum pagamento registrado.</p>
+      {% endif %}
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-medal text-purple-600"></i> Minhas Graduações</h2>
+      {% if graduacoes %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Data</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Anterior</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Nova</th>
+              <th class="text-left px-3 py-2 text-gray-600 font-semibold">Por</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for g in graduacoes %}
+            <tr class="border-t hover:bg-gray-50">
+              <td class="px-3 py-2">{{ g.graduado_em|date:"d/m/Y" }}</td>
+              <td class="px-3 py-2">{{ g.faixa_anterior }} {{ g.grau_anterior }}°</td>
+              <td class="px-3 py-2 font-semibold text-purple-700">{{ g.faixa_nova }} {{ g.grau_novo }}°</td>
+              <td class="px-3 py-2">{{ g.user.get_full_name|default:g.user.username }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-gray-400 text-sm">Nenhuma graduação registrada.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

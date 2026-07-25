@@ -11,9 +11,10 @@ from .models import ConviteAluno
 from apps.alunos.models import Aluno
 from apps.accounts.models import User
 from apps.parametros.models import Modalidade
+from apps.core.mixins import AdminRequiredMixin
 
 
-class ConviteListView(LoginRequiredMixin, ListView):
+class ConviteListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = ConviteAluno
     template_name = 'convites/convite_list.html'
     context_object_name = 'convites'
@@ -24,7 +25,7 @@ class ConviteListView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class ConviteCreateView(LoginRequiredMixin, CreateView):
+class ConviteCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = ConviteAluno
     template_name = 'convites/convite_form.html'
     fields = ['filial', 'max_uses', 'expires_at']
@@ -35,12 +36,12 @@ class ConviteCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ConviteDeleteView(LoginRequiredMixin, DeleteView):
+class ConviteDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = ConviteAluno
     success_url = reverse_lazy('convites:list')
 
 
-class ConviteToggleView(LoginRequiredMixin, View):
+class ConviteToggleView(LoginRequiredMixin, AdminRequiredMixin, View):
     def post(self, request, pk):
         convite = get_object_or_404(ConviteAluno, pk=pk)
         convite.active = not convite.active

@@ -1,13 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from .models import Modalidade, HorarioTreino, GraduacaoParametro, AcademiaParametro
-
-
-class AdminRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.role == 'super_admin' or self.request.user.is_superuser
+from apps.core.mixins import AdminRequiredMixin
 
 
 class ParametroListView(LoginRequiredMixin, AdminRequiredMixin, ListView):

@@ -5,16 +5,17 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.views import View
 from .models import Aluno, MensalidadePagamento, GraduacaoAluno
 from apps.parametros.models import Modalidade, HorarioTreino
+from apps.core.mixins import RoleFilterMixin, RoleFilterDetailMixin, AdminRequiredMixin, ProfessorAccessMixin
 
 
-class AlunoListView(LoginRequiredMixin, ListView):
+class AlunoListView(LoginRequiredMixin, RoleFilterMixin, ListView):
     model = Aluno
     template_name = 'alunos/aluno_list.html'
     context_object_name = 'alunos'
     paginate_by = 50
 
 
-class AlunoCreateView(LoginRequiredMixin, CreateView):
+class AlunoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Aluno
     template_name = 'alunos/aluno_form.html'
     fields = '__all__'
@@ -34,7 +35,7 @@ class AlunoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class AlunoUpdateView(LoginRequiredMixin, UpdateView):
+class AlunoUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Aluno
     template_name = 'alunos/aluno_form.html'
     fields = '__all__'
@@ -56,7 +57,7 @@ class AlunoUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class AlunoDetailView(LoginRequiredMixin, DetailView):
+class AlunoDetailView(LoginRequiredMixin, RoleFilterDetailMixin, DetailView):
     model = Aluno
     template_name = 'alunos/aluno_detail.html'
     context_object_name = 'aluno'
@@ -68,7 +69,7 @@ class AlunoDetailView(LoginRequiredMixin, DetailView):
         return ctx
 
 
-class MensalidadeCreateView(LoginRequiredMixin, View):
+class MensalidadeCreateView(LoginRequiredMixin, ProfessorAccessMixin, View):
     def post(self, request, pk):
         aluno = get_object_or_404(Aluno, pk=pk)
         referencia_mes = request.POST.get('referencia_mes')
@@ -89,7 +90,7 @@ class MensalidadeCreateView(LoginRequiredMixin, View):
         return redirect('alunos:detail', pk=pk)
 
 
-class MensalidadeDeleteView(LoginRequiredMixin, View):
+class MensalidadeDeleteView(LoginRequiredMixin, ProfessorAccessMixin, View):
     def post(self, request, pk):
         pagamento = get_object_or_404(MensalidadePagamento, pk=pk)
         aluno_pk = pagamento.aluno.pk
@@ -97,7 +98,7 @@ class MensalidadeDeleteView(LoginRequiredMixin, View):
         return redirect('alunos:detail', pk=aluno_pk)
 
 
-class GraduacaoCreateView(LoginRequiredMixin, View):
+class GraduacaoCreateView(LoginRequiredMixin, ProfessorAccessMixin, View):
     def post(self, request, pk):
         aluno = get_object_or_404(Aluno, pk=pk)
         faixa_nova = request.POST.get('faixa_nova')
