@@ -1,12 +1,24 @@
-﻿from django.contrib.auth import views as auth_views
+﻿from django.contrib.auth import views as auth_views, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.forms import AuthenticationForm
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.contrib import messages
 
+
+class LoginForm(AuthenticationForm):
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        cleaned = ''.join(c for c in username if c.isdigit())
+        if len(cleaned) == 11:
+            return cleaned
+        return username
+
+
 class LoginView(auth_views.LoginView):
     template_name = "accounts/login.html"
     redirect_authenticated_user = True
+    form_class = LoginForm
 
     def form_valid(self, form):
         response = super().form_valid(form)

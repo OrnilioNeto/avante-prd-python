@@ -43,6 +43,8 @@ class Aluno(models.Model):
                 if not Aluno.objects.filter(codigo=code).exists():
                     self.codigo = code
                     break
+        if self.cpf:
+            self.cpf = ''.join(c for c in self.cpf if c.isdigit())
         super().save(*args, **kwargs)
 
     class Meta:

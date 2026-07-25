@@ -17,6 +17,11 @@ class User(AbstractUser):
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, verbose_name='Foto de Perfil')
     telefone = models.CharField(max_length=20, blank=True, verbose_name='Telefone')
 
+    def save(self, *args, **kwargs):
+        if self.cpf:
+            self.cpf = ''.join(c for c in self.cpf if c.isdigit())
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
