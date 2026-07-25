@@ -4,7 +4,7 @@
 <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2 space-y-6">
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
-      <form method="post" action="{% url 'rede:criar_post' %}" enctype="multipart/form-data" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <form method="post" action="{% url 'rede:criar_post' %}" enctype="multipart/form-data" class="flex flex-col gap-3" id="postForm">
         {% csrf_token %}
         <div class="flex items-center gap-3">
           {% if user.profile_photo %}
@@ -16,18 +16,39 @@
           {% endif %}
           <input type="text" name="content" placeholder="O que está acontecendo, {{ user.first_name }}?" class="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-green-400">
         </div>
-        <div class="flex items-center gap-2">
-          <label class="cursor-pointer text-gray-400 hover:text-green-600 transition p-2 flex items-center gap-1 text-sm" title="Adicionar imagem">
+        <div id="previewArea" class="hidden relative rounded-xl overflow-hidden bg-gray-50 border border-gray-200">
+          <img id="imagePreview" class="w-full max-h-60 object-contain">
+          <button type="button" onclick="removerImagem()" class="absolute top-2 right-2 bg-black/50 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/70 text-sm"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+          <label class="cursor-pointer text-gray-400 hover:text-green-600 transition px-3 py-2 rounded-lg border border-gray-200 hover:border-green-400 flex items-center gap-2 text-sm flex-1 sm:flex-none justify-center" title="Adicionar imagem">
             <i class="fas fa-image text-lg"></i>
-            <span class="hidden sm:inline">Foto</span>
-            <input type="file" name="image" accept="image/*" class="hidden">
+            <span>Foto</span>
+            <input type="file" name="image" id="imageInput" accept="image/*" class="hidden" onchange="previewImagem(this)">
           </label>
-          <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition w-full sm:w-auto text-center">
+          <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition flex-1 sm:flex-none text-center">
             Publicar
           </button>
         </div>
       </form>
     </div>
+    <script>
+    function previewImagem(input) {
+      const area = document.getElementById('previewArea');
+      const img = document.getElementById('imagePreview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; };
+        reader.readAsDataURL(input.files[0]);
+        area.classList.remove('hidden');
+      }
+    }
+    function removerImagem() {
+      document.getElementById('imageInput').value = '';
+      document.getElementById('previewArea').classList.add('hidden');
+      document.getElementById('imagePreview').src = '';
+    }
+    </script>
 
     {% for post in posts %}
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
