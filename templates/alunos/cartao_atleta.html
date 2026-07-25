@@ -22,16 +22,11 @@
           <p class="text-xs text-green-500">{{ total_presencas }} presenças em {{ dias_desde_inicio }} dias</p>
         </div>
 
+        {% comment %} Ranking / XP desativado
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-purple-50 rounded-xl p-3 text-center">
-            <p class="text-lg font-bold text-purple-700">{{ total_xp }}</p>
-            <p class="text-xs text-purple-600">XP Total</p>
-          </div>
-          <div class="bg-amber-50 rounded-xl p-3 text-center">
-            <p class="text-lg font-bold text-amber-700">#{{ posicao }}</p>
-            <p class="text-xs text-amber-600">Ranking ({{ ranking_count }})</p>
-          </div>
+          ...
         </div>
+        {% endcomment %}
       </div>
     </div>
 
