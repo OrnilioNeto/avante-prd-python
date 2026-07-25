@@ -2,33 +2,47 @@
 {% block title %}Convites - Avante{% endblock %}
 {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Convites</h1>
-    <a href="{% url 'convites:create' %}" class="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600">Novo Convite</a>
+    <h1 class="text-2xl font-bold flex items-center gap-2"><i class="fas fa-envelope text-green-600"></i> Convites</h1>
+    <a href="{% url 'convites:create' %}" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center gap-2"><i class="fas fa-plus"></i> Novo Convite</a>
 </div>
-<div class="bg-white rounded-lg shadow overflow-hidden">
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
     <table class="w-full">
-        <thead class="bg-gray-100">
+        <thead class="bg-gray-50">
             <tr>
-                <th class="text-left px-4 py-3">Token</th>
-                <th class="text-left px-4 py-3">Filial</th>
-                <th class="text-left px-4 py-3">Expira</th>
-                <th class="text-left px-4 py-3">Ativo</th>
-                <th class="text-left px-4 py-3">Ações</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Link</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Filial</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Expira</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Usos</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Ativo</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Ações</th>
             </tr>
         </thead>
         <tbody>
             {% for convite in convites %}
             <tr class="border-t hover:bg-gray-50">
-                <td class="px-4 py-3 font-mono text-sm">{{ convite.token|truncatechars:16 }}</td>
-                <td class="px-4 py-3">{{ convite.filial.nome }}</td>
-                <td class="px-4 py-3">{{ convite.expires_at }}</td>
-                <td class="px-4 py-3">{{ convite.active|yesno:"Sim,Não" }}</td>
                 <td class="px-4 py-3">
-                    <a href="{% url 'convites:delete' convite.pk %}" class="text-red-600 hover:underline">Excluir</a>
+                    <div class="flex items-center gap-2">
+                        <input type="text" value="{{ base_url }}{% url 'convites:register' convite.token %}" class="text-xs font-mono bg-gray-50 border rounded px-2 py-1 w-56" readonly id="link-{{ convite.pk }}">
+                        <button onclick="navigator.clipboard.writeText(document.getElementById('link-{{ convite.pk }}').value)" class="text-blue-600 hover:text-blue-800 text-sm" title="Copiar link"><i class="fas fa-copy"></i></button>
+                    </div>
+                </td>
+                <td class="px-4 py-3">{{ convite.filial.nome }}</td>
+                <td class="px-4 py-3 text-sm">{{ convite.expires_at|date:"d/m/Y H:i" }}</td>
+                <td class="px-4 py-3 text-sm">{{ convite.use_count }}{% if convite.max_uses %}/{{ convite.max_uses }}{% endif %}</td>
+                <td class="px-4 py-3">
+                    <form method="post" action="{% url 'convites:toggle' convite.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="px-3 py-1 rounded-full text-xs font-medium {% if convite.active %}bg-green-100 text-green-700 hover:bg-green-200{% else %}bg-red-100 text-red-700 hover:bg-red-200{% endif %}">
+                            {{ convite.active|yesno:"Ativo,Inativo" }}
+                        </button>
+                    </form>
+                </td>
+                <td class="px-4 py-3">
+                    <a href="{% url 'convites:delete' convite.pk %}" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"><i class="fas fa-trash"></i> Excluir</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Nenhum convite gerado.</td></tr>
+            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Nenhum convite gerado.</td></tr>
             {% endfor %}
         </tbody>
     </table>

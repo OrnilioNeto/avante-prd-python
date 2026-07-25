@@ -6,7 +6,7 @@ from .models import Filial
 
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.role == 'super_admin'
+        return self.request.user.is_superuser or self.request.user.role == 'super_admin'
 
 
 class FilialListView(LoginRequiredMixin, AdminRequiredMixin, ListView):

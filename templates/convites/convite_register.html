@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - Avante</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { background: linear-gradient(135deg, #064e3b, #047857); min-height: 100vh; }
+  </style>
+</head>
+<body class="flex items-center justify-center p-4">
+  <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-black text-green-900 tracking-tight">AVANTE</h1>
+      <p class="text-green-700 text-sm">Preencha seus dados para se cadastrar</p>
+      <p class="text-gray-500 text-xs mt-1">Convite: {{ convite.filial.nome }}</p>
+    </div>
+
+    {% if error %}
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% else %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Nome Completo *</label>
+          <input type="text" name="nome" value="{{ data.nome|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+          {% if errors.nome %}<p class="text-red-500 text-xs mt-1">{{ errors.nome }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Data de Nascimento *</label>
+          <input type="date" name="data_nascimento" value="{{ data.data_nascimento|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+          {% if errors.data_nascimento %}<p class="text-red-500 text-xs mt-1">{{ errors.data_nascimento }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Telefone *</label>
+          <input type="text" name="telefone" value="{{ data.telefone|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">E-mail *</label>
+          <input type="email" name="email" value="{{ data.email|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">CPF</label>
+          <input type="text" name="cpf" value="{{ data.cpf|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" placeholder="000.000.000-00">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Data de Início *</label>
+          <input type="date" name="data_inicio" value="{{ data.data_inicio|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" required>
+          {% if errors.data_inicio %}<p class="text-red-500 text-xs mt-1">{{ errors.data_inicio }}</p>{% endif %}
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Modalidades *</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {% for m in modalidades %}
+            <label class="flex items-center gap-2 p-2 border rounded-lg hover:bg-green-50 cursor-pointer">
+              <input type="checkbox" name="modalidades" value="{{ m.id }}"
+                {% if data.modalidades and m.id|stringformat:'s' in data.modalidades %}checked{% endif %}
+                class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+              <span class="text-sm">{{ m.nome }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% if errors.modalidades %}<p class="text-red-500 text-xs mt-1">{{ errors.modalidades }}</p>{% endif %}
+        </div>
+
+        <div class="md:col-span-2 border-t pt-4 mt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="tem_responsavel" value="true" id="id_tem_responsavel"
+              onchange="document.getElementById('resp_fields').classList.toggle('hidden', !this.checked)"
+              class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+            <span class="text-sm font-medium text-gray-700">Possui responsável</span>
+          </label>
+        </div>
+
+        <div id="resp_fields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Nome do Responsável</label>
+            <input type="text" name="responsavel_nome" value="{{ data.responsavel_nome|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">CPF do Responsável</label>
+            <input type="text" name="responsavel_cpf" value="{{ data.responsavel_cpf|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" placeholder="000.000.000-00">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Telefone do Responsável</label>
+            <input type="text" name="responsavel_telefone" value="{{ data.responsavel_telefone|default:'' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="w-full mt-6 bg-gradient-to-r from-green-700 to-green-600 text-white py-2.5 rounded-lg hover:from-green-600 hover:to-green-500 font-semibold shadow-md hover:shadow-lg transition-all duration-200">
+        <i class="fas fa-check-circle"></i> Finalizar Cadastro
+      </button>
+    </form>
+    <p class="text-center text-xs text-gray-400 mt-4">Após o cadastro, sua senha inicial será <strong>123456</strong>. Altere após o primeiro login.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

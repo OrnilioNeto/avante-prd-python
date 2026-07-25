@@ -2,35 +2,50 @@
 {% block title %}Alunos - Avante{% endblock %}
 {% block content %}
 <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Alunos</h1>
-    <a href="{% url 'alunos:create' %}" class="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600">Novo Aluno</a>
+    <h1 class="text-2xl font-bold flex items-center gap-2"><i class="fas fa-users text-blue-600"></i> Alunos</h1>
+    <a href="{% url 'alunos:create' %}" class="bg-gradient-to-r from-green-700 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-500 transition flex items-center gap-2"><i class="fas fa-plus"></i> Novo Aluno</a>
 </div>
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="w-full">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="text-left px-4 py-3">Nome</th>
-                <th class="text-left px-4 py-3">Faixa</th>
-                <th class="text-left px-4 py-3">Status</th>
-                <th class="text-left px-4 py-3">Filial</th>
-                <th class="text-left px-4 py-3">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for aluno in alunos %}
-            <tr class="border-t hover:bg-gray-50">
-                <td class="px-4 py-3">{{ aluno.nome }}</td>
-                <td class="px-4 py-3">{{ aluno.faixa }} {{ aluno.grau }}°</td>
-                <td class="px-4 py-3">{{ aluno.get_status_display }}</td>
-                <td class="px-4 py-3">{{ aluno.filial.nome|default:"-" }}</td>
-                <td class="px-4 py-3">
-                    <a href="{% url 'alunos:detail' aluno.pk %}" class="text-blue-600 hover:underline">Detalhes</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Nenhum aluno cadastrado.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-user mr-1"></i> Nome</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-phone mr-1"></i> Telefone</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-medal mr-1"></i> Faixa/Grau</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-calendar mr-1"></i> Dia Mens.</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-clock mr-1"></i> Horário</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-circle mr-1"></i> Status</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600"><i class="fas fa-building mr-1"></i> Filial</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aluno in alunos %}
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium">{{ aluno.nome }}</td>
+                    <td class="px-4 py-3 text-sm">{{ aluno.telefone|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ aluno.faixa }} {{ aluno.grau }}°</td>
+                    <td class="px-4 py-3 text-sm">{{ aluno.dia_vencimento|default:"-" }}</td>
+                    <td class="px-4 py-3 text-sm">{{ aluno.horario_treino.descricao|default:"-" }}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium {% if aluno.status == 'ativo' %}bg-green-100 text-green-700{% elif aluno.status == 'inativo' %}bg-red-100 text-red-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ aluno.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">{{ aluno.filial.nome|default:"-" }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'alunos:detail' aluno.pk %}" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'alunos:update' aluno.pk %}" class="text-green-600 hover:text-green-800 text-sm flex items-center gap-1"><i class="fas fa-edit"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500">Nenhum aluno cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{% if object %}Editar{% else %}Novo{% endif %} Aluno - Avante{% endblock %}
 {% block content %}
-<div class="max-w-3xl mx-auto">
+<div class="max-w-4xl mx-auto">
   <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-900">{% if object %}Editar{% else %}Novo{% endif %} Aluno</h1>
     <p class="text-gray-500 mt-1">Preencha os dados do aluno</p>
@@ -9,32 +9,143 @@
   <form method="post" class="bg-white p-8 rounded-xl shadow-md border border-gray-100">
     {% csrf_token %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {% for field in form %}
-      <div class="{% if field.name == 'observacao' %}col-span-2{% endif %}">
-        <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-        {% if field.field.widget.input_type == 'date' or field.name == 'data_nascimento' or field.name == 'data_inicio' %}
-          <input type="text" name="{{ field.name }}" value="{{ field.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="{{ field.label }}">
-        {% elif field.name == 'status' %}
-          <select name="{{ field.name }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
-            {% for value, label in field.field.choices %}
-            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        {% elif field.name == 'filial' %}
-          <select name="{{ field.name }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
-            {% for value, label in field.field.choices %}
-            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        {% else %}
-          <input type="text" name="{{ field.name }}" value="{{ field.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="{{ field.label }}">
-        {% endif %}
-        {% if field.errors %}
-        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
-        {% endif %}
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+        <input type="text" name="nome" value="{{ form.nome.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+        {% if form.nome.errors %}<p class="text-red-500 text-xs mt-1">{{ form.nome.errors.0 }}</p>{% endif %}
       </div>
-      {% endfor %}
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento *</label>
+        <input type="date" name="data_nascimento" value="{{ form.data_nascimento.value|date:'Y-m-d'|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+        {% if form.data_nascimento.errors %}<p class="text-red-500 text-xs mt-1">{{ form.data_nascimento.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+        <input type="text" name="telefone" value="{{ form.telefone.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="(00) 00000-0000" required>
+        {% if form.telefone.errors %}<p class="text-red-500 text-xs mt-1">{{ form.telefone.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+        <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="email@exemplo.com">
+        {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+        <input type="text" name="cpf" value="{{ form.cpf.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="000.000.000-00" {% if object %}readonly{% endif %}>
+        {% if form.cpf.errors %}<p class="text-red-500 text-xs mt-1">{{ form.cpf.errors.0 }}</p>{% endif %}
+        {% if object %}<p class="text-gray-400 text-xs mt-1">CPF bloqueado após o cadastro</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Data de Início *</label>
+        <input type="date" name="data_inicio" value="{{ form.data_inicio.value|date:'Y-m-d'|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+        {% if form.data_inicio.errors %}<p class="text-red-500 text-xs mt-1">{{ form.data_inicio.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Filial</label>
+        <select name="filial" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+          {% for value, label in form.filial.field.choices %}
+          <option value="{{ value }}" {% if form.filial.value|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Horário de Treino</label>
+        <select name="horario_treino" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+          <option value="">Selecione...</option>
+          {% for h in horarios %}
+          <option value="{{ h.id }}" {% if form.horario_treino.value|stringformat:'s' == h.id|stringformat:'s' %}selected{% endif %}>{{ h.descricao }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Modalidades</label>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {% for m in modalidades %}
+          <label class="flex items-center gap-2 p-2 border rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input type="checkbox" name="modalidades" value="{{ m.id }}"
+              {% if modalidades_selecionadas and m.id in modalidades_selecionadas %}checked{% endif %}
+              class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+            <span class="text-sm">{{ m.nome }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% if form.modalidades.errors %}<p class="text-red-500 text-xs mt-1">{{ form.modalidades.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Faixa *</label>
+        <input type="text" name="faixa" value="{{ form.faixa.value|default:'Branca' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Grau</label>
+        <input type="number" name="grau" value="{{ form.grau.value|default:'0' }}" min="0" max="20" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Dia do Vencimento</label>
+        <input type="number" name="dia_vencimento" value="{{ form.dia_vencimento.value|default:'' }}" min="1" max="31" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="Ex: 5">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Valor da Mensalidade</label>
+        <input type="number" name="valor_mensalidade" value="{{ form.valor_mensalidade.value|default:'' }}" step="0.01" min="0" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="Ex: 60.00">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Última Graduação</label>
+        <input type="date" name="data_ultima_graduacao" value="{{ form.data_ultima_graduacao.value|date:'Y-m-d'|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select name="status" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5">
+          {% for value, label in form.status.field.choices %}
+          <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="md:col-span-2 border-t pt-4 mt-2">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="tem_responsavel" value="true" id="id_tem_responsavel"
+            {% if form.tem_responsavel.value %}checked{% endif %}
+            class="rounded border-gray-300 text-green-600 focus:ring-green-500"
+            onchange="document.getElementById('responsavel_fields').classList.toggle('hidden', !this.checked)">
+          <span class="text-sm font-medium text-gray-700">Aluno possui responsável</span>
+        </label>
+      </div>
+
+      <div id="responsavel_fields" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 {% if not form.tem_responsavel.value %}hidden{% endif %}">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Responsável</label>
+          <input type="text" name="responsavel_nome" value="{{ form.responsavel_nome.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="Nome do responsável">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">CPF do Responsável</label>
+          <input type="text" name="responsavel_cpf" value="{{ form.responsavel_cpf.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="000.000.000-00">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Telefone do Responsável</label>
+          <input type="text" name="responsavel_telefone" value="{{ form.responsavel_telefone.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="(00) 00000-0000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Telefone 2 do Responsável</label>
+          <input type="text" name="responsavel_telefone2" value="{{ form.responsavel_telefone2.value|default:'' }}" class="input-focus w-full border border-gray-300 rounded-lg px-4 py-2.5" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+
     </div>
+
     <div class="mt-8 flex items-center gap-3 pt-6 border-t border-gray-100">
       <button type="submit" class="bg-gradient-to-r from-green-700 to-green-600 text-white px-6 py-2.5 rounded-lg hover:from-green-600 hover:to-green-500 font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2">
         <i class="fas fa-save"></i> Salvar

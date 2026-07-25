@@ -1,0 +1,19 @@
+Send Feedback
+Forums
+Help
+Blog
+Account
+Log out
+Dashboard
+Consoles
+Files
+Web
+Tasks
+Databases
+MySQL
+Postgres
+Upgrade required
+
+MySQL is not available on free accounts. If you want to enable it, you'll have to upgrade to any paid plan.
+
+Copyright © 2011-2026 PythonAnywhere LLP — Terms — Privacy & Cookies

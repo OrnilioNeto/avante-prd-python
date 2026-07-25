@@ -8,4 +8,7 @@ urlpatterns = [
     path('novo/', views.AlunoCreateView.as_view(), name='create'),
     path('<int:pk>/', views.AlunoDetailView.as_view(), name='detail'),
     path('<int:pk>/editar/', views.AlunoUpdateView.as_view(), name='update'),
+    path('<int:pk>/mensalidade/', views.MensalidadeCreateView.as_view(), name='mensalidade_create'),
+    path('mensalidade/<int:pk>/excluir/', views.MensalidadeDeleteView.as_view(), name='mensalidade_delete'),
+    path('<int:pk>/graduacao/', views.GraduacaoCreateView.as_view(), name='graduacao_create'),
 ]

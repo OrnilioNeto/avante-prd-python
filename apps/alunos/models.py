@@ -1,5 +1,6 @@
 from django.db import models
 from apps.filiais.models import Filial
+from apps.parametros.models import Modalidade, HorarioTreino
 
 
 class Aluno(models.Model):
@@ -14,8 +15,18 @@ class Aluno(models.Model):
     email = models.EmailField(blank=True, verbose_name='E-mail')
     cpf = models.CharField(max_length=14, unique=True, verbose_name='CPF')
     data_inicio = models.DateField(verbose_name='Data de Início')
+    modalidades = models.JSONField(null=True, blank=True, verbose_name='Modalidades')
     faixa = models.CharField(max_length=50, verbose_name='Faixa')
     grau = models.IntegerField(default=0, verbose_name='Grau')
+    data_ultima_graduacao = models.DateField(null=True, blank=True, verbose_name='Última Graduação')
+    horario_treino = models.ForeignKey(HorarioTreino, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Horário de Treino')
+    dia_vencimento = models.IntegerField(null=True, blank=True, verbose_name='Dia do Vencimento')
+    valor_mensalidade = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Valor da Mensalidade')
+    tem_responsavel = models.BooleanField(default=False, verbose_name='Tem Responsável')
+    responsavel_nome = models.CharField(max_length=255, blank=True, verbose_name='Nome do Responsável')
+    responsavel_cpf = models.CharField(max_length=14, blank=True, verbose_name='CPF do Responsável')
+    responsavel_telefone = models.CharField(max_length=20, blank=True, verbose_name='Telefone do Responsável')
+    responsavel_telefone2 = models.CharField(max_length=20, blank=True, verbose_name='Telefone 2 do Responsável')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ATIVO)
     filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, verbose_name='Filial')
     created_at = models.DateTimeField(auto_now_add=True)
