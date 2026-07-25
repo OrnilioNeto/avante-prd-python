@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:pk>/mensalidade/', views.MensalidadeCreateView.as_view(), name='mensalidade_create'),
     path('mensalidade/<int:pk>/excluir/', views.MensalidadeDeleteView.as_view(), name='mensalidade_delete'),
     path('<int:pk>/graduacao/', views.GraduacaoCreateView.as_view(), name='graduacao_create'),
+    path('qr-code/', views.GerarQRCodeView.as_view(), name='qr_code'),
+    path('presenca-manual/', views.registrar_presenca_manual, name='presenca_manual'),
 ]

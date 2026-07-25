@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}QR Code de Presença - Avante{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto text-center">
+  <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">QR Code de Presença</h1>
+    <p class="text-gray-500 mb-6">Imprima e cole na parede da academia</p>
+    <div class="bg-white p-4 rounded-xl border-2 border-dashed border-gray-200 inline-block">
+      <img src="{{ qr_data_url }}" alt="QR Code Presença" class="w-64 h-64 mx-auto">
+    </div>
+    <p class="text-sm text-gray-400 mt-4 break-all">{{ qr_url }}</p>
+    <div class="mt-6 flex justify-center gap-3">
+      <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
+        <i class="fas fa-print"></i> Imprimir
+      </button>
+      <a href="{% url 'core:professor_dashboard' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg font-medium transition">
+        Voltar
+      </a>
+    </div>
+  </div>
+  <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-left text-sm text-yellow-800">
+    <p class="font-medium mb-1"><i class="fas fa-info-circle"></i> Como usar:</p>
+    <ol class="list-decimal list-inside space-y-1 text-yellow-700">
+      <li>Imprima este QR Code</li>
+      <li>Cole na parede da academia</li>
+      <li>Alunos escaneiam com o celular</li>
+      <li>Digitam CPF ou código do aluno</li>
+      <li>Presença registrada automaticamente</li>
+    </ol>
+  </div>
+</div>
+{% endblock %}

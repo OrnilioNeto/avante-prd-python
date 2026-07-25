@@ -5,3 +5,4 @@ django-crispy-forms>=2.0
 crispy-tailwind>=1.0
 Pillow>=10.0
 django-filter>=24.0
+qrcode>=8.0

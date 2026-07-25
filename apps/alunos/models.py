@@ -1,4 +1,7 @@
+import uuid
+
 from django.db import models
+from django.utils.crypto import get_random_string
 from apps.filiais.models import Filial
 from apps.parametros.models import Modalidade, HorarioTreino
 
@@ -14,6 +17,7 @@ class Aluno(models.Model):
     telefone = models.CharField(max_length=20, blank=True, verbose_name='Telefone')
     email = models.EmailField(blank=True, verbose_name='E-mail')
     cpf = models.CharField(max_length=14, unique=True, verbose_name='CPF')
+    codigo = models.CharField(max_length=10, unique=True, blank=True, verbose_name='Código do Aluno')
     data_inicio = models.DateField(verbose_name='Data de Início')
     modalidades = models.JSONField(null=True, blank=True, verbose_name='Modalidades')
     faixa = models.CharField(max_length=50, verbose_name='Faixa')
@@ -31,6 +35,15 @@ class Aluno(models.Model):
     filial = models.ForeignKey(Filial, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Filial')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.codigo:
+            while True:
+                code = 'A' + get_random_string(4, '0123456789')
+                if not Aluno.objects.filter(codigo=code).exists():
+                    self.codigo = code
+                    break
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Aluno'
@@ -86,3 +99,19 @@ class MensalidadePagamento(models.Model):
 
     def __str__(self):
         return f'{self.aluno} - {self.referencia_mes.strftime("%m/%Y")}'
+
+
+class Presenca(models.Model):
+    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='presencas')
+    data = models.DateField(verbose_name='Data')
+    marcado_por = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Presença'
+        verbose_name_plural = 'Presenças'
+        unique_together = ('aluno', 'data')
+        ordering = ['-data']
+
+    def __str__(self):
+        return f'{self.aluno} - {self.data}'

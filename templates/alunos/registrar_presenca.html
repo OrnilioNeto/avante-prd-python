@@ -1,0 +1,53 @@
+{% extends 'base_public.html' %}
+{% block title %}Registrar Presença - Avante{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i class="fas fa-fist-raised text-2xl text-green-700"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Avante Jiu-Jitsu</h1>
+        <p class="text-gray-500 mt-1">Registrar Presença no Treino</p>
+      </div>
+
+      {% if erro %}
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm flex items-center gap-2">
+        <i class="fas fa-exclamation-circle"></i> {{ erro }}
+      </div>
+      {% endif %}
+
+      {% if presenca_hoje %}
+      <div class="text-center py-4">
+        <a href="{% url 'core:cartao_atleta' aluno.pk %}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition inline-block">
+          <i class="fas fa-id-card mr-2"></i> Ver meu Cartão de Atleta
+        </a>
+      </div>
+      {% endif %}
+
+      {% if not presenca_hoje %}
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+          <input type="text" name="cpf" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-center text-lg" placeholder="000.000.000-00" inputmode="numeric">
+        </div>
+        <div class="text-center text-gray-400 text-sm">— ou —</div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Código do Aluno</label>
+          <input type="text" name="codigo" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-center text-lg" placeholder="Ex: A1234">
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-green-700 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-500 transition shadow-md text-lg">
+          <i class="fas fa-check-circle mr-2"></i> Registrar Presença
+        </button>
+      </form>
+      {% endif %}
+
+      <div class="mt-6 text-center">
+        <p class="text-xs text-gray-400">Ao registrar, você confirma sua presença no treino de hoje.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

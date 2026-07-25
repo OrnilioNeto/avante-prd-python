@@ -1,13 +1,19 @@
 from datetime import datetime, date
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, redirect
+from django.db import models
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.views import View
-from .models import Aluno, MensalidadePagamento, GraduacaoAluno
+from .models import Aluno, MensalidadePagamento, GraduacaoAluno, Presenca
 from apps.accounts.models import User
 from apps.parametros.models import Modalidade, HorarioTreino
 from apps.core.mixins import RoleFilterMixin, RoleFilterDetailMixin, PermissaoMixin
+import qrcode
+from io import BytesIO
+import base64
 
 
 class AlunoListView(LoginRequiredMixin, PermissaoMixin, RoleFilterMixin, ListView):
@@ -179,3 +185,124 @@ class GraduacaoCreateView(LoginRequiredMixin, PermissaoMixin, View):
         aluno.save()
 
         return redirect('alunos:detail', pk=pk)
+
+
+class GerarQRCodeView(LoginRequiredMixin, View):
+    def get(self, request):
+        qr_url = request.build_absolute_uri('/presenca/')
+        img = qrcode.make(qr_url)
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        b64 = base64.b64encode(buf.read()).decode()
+        return render(request, 'alunos/qr_code.html', {
+            'qr_data_url': f'data:image/png;base64,{b64}',
+            'qr_url': qr_url,
+        })
+
+
+def registrar_presenca(request):
+    erro = None
+    aluno = None
+    presenca_hoje = False
+
+    if request.method == 'POST':
+        cpf = request.POST.get('cpf', '').strip()
+        codigo = request.POST.get('codigo', '').strip()
+        q = Aluno.objects.filter(status='ativo')
+        if cpf:
+            cpf_clean = cpf.replace('.', '').replace('-', '')
+            alunos = q.filter(cpf__contains=cpf_clean)
+        elif codigo:
+            alunos = q.filter(codigo__iexact=codigo)
+        else:
+            alunos = Aluno.objects.none()
+            erro = 'Informe CPF ou Código do Aluno.'
+
+        if alunos and not erro:
+            aluno = alunos.first()
+            hoje = date.today()
+            if Presenca.objects.filter(aluno=aluno, data=hoje).exists():
+                erro = f'{aluno.nome} já teve presença registrada hoje.'
+                presenca_hoje = True
+            else:
+                Presenca.objects.create(aluno=aluno, data=hoje)
+                return redirect('alunos:cartao_atleta', aluno_id=aluno.pk)
+
+    return render(request, 'alunos/registrar_presenca.html', {
+        'erro': erro,
+        'aluno': aluno,
+        'presenca_hoje': presenca_hoje,
+    })
+
+
+def cartao_atleta(request, aluno_id):
+    aluno = get_object_or_404(Aluno, pk=aluno_id)
+    hoje = date.today()
+
+    total_presencas = aluno.presencas.count()
+    dias_desde_inicio = (hoje - aluno.data_inicio).days or 1
+    assiduidade = round((total_presencas / dias_desde_inicio) * 100, 1)
+    if assiduidade > 100:
+        assiduidade = 100.0
+
+    from apps.core.views import _get_ranking
+    from decimal import Decimal
+    faixa_ordem = ['Branca', 'Azul', 'Roxa', 'Marrom', 'Preta']
+    total_xp = 0
+    for g in aluno.graduacoes.all():
+        total_xp += 500
+    total_pago = MensalidadePagamento.objects.filter(aluno=aluno, pago_em__isnull=False).aggregate(
+        total=models.Sum('valor')
+    )['total'] or Decimal('0.00')
+    total_xp += int(float(total_pago)) // 10
+
+    ranking = _get_ranking(aluno)
+    posicao = None
+    ranking_count = 0
+    for pk, nome, pts in ranking:
+        ranking_count += 1
+        if pk == aluno.pk:
+            posicao = ranking_count
+
+    pagamentos_em_dia = aluno.pagamentos.filter(pago_em__isnull=False)
+    pagamentos_em_atraso = aluno.pagamentos.filter(pago_em__isnull=True, vencimento_em__lt=hoje)
+
+    graduacoes = aluno.graduacoes.all()
+
+    return render(request, 'alunos/cartao_atleta.html', {
+        'aluno': aluno,
+        'assiduidade': assiduidade,
+        'total_presencas': total_presencas,
+        'total_xp': total_xp,
+        'posicao': posicao,
+        'ranking_count': ranking_count,
+        'dias_desde_inicio': dias_desde_inicio,
+        'pagamentos_em_dia': pagamentos_em_dia,
+        'pagamentos_em_atraso': pagamentos_em_atraso,
+        'graduacoes': graduacoes,
+        'total_pago': total_pago,
+        'hoje': hoje,
+        'faixas': faixa_ordem,
+    })
+
+
+@login_required
+def registrar_presenca_manual(request):
+    if request.method == 'POST':
+        aluno_id = request.POST.get('aluno')
+        data_str = request.POST.get('data', date.today().isoformat())
+        aluno = get_object_or_404(Aluno, pk=aluno_id)
+        if not Presenca.objects.filter(aluno=aluno, data=data_str).exists():
+            Presenca.objects.create(aluno=aluno, data=data_str, marcado_por=request.user)
+        return redirect('alunos:presenca_manual')
+
+    alunos = Aluno.objects.filter(status='ativo').order_by('nome')
+    hoje = date.today()
+    presencas_hoje = Presenca.objects.filter(data=hoje, marcado_por=request.user
+    ).select_related('aluno')
+    return render(request, 'alunos/presenca_manual.html', {
+        'alunos': alunos,
+        'presencas_hoje': presencas_hoje,
+        'hoje': hoje,
+    })

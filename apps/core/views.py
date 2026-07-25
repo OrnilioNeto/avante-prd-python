@@ -121,15 +121,7 @@ def minha_conta(request):
     xp_atual = xp
     xp_progresso = min(100, int((xp_atual % 1000) / 1000 * 100)) if xp_atual > 0 else 0
 
-    todos_alunos = Aluno.objects.filter(status='ativo')
-    ranking_data = []
-    for a in todos_alunos:
-        a_pags = MensalidadePagamento.objects.filter(aluno=a, pago_em__isnull=False).count()
-        a_grads = GraduacaoAluno.objects.filter(aluno=a).count()
-        a_dias = (hoje - a.data_inicio).days if a.data_inicio else 0
-        a_xp = a_dias * 10 + a_grads * 500 + a_pags * 50
-        ranking_data.append((a.pk, a.nome, a_xp))
-    ranking_data.sort(key=lambda x: x[2], reverse=True)
+    ranking_data = _get_ranking(aluno)
     posicao = next((i+1 for i, (pk, _, _) in enumerate(ranking_data) if pk == aluno.pk), None)
     top3 = ranking_data[:3]
     ranking_count = len(ranking_data)
@@ -158,6 +150,20 @@ def minha_conta(request):
         'ranking_count': ranking_count,
         'FAIXAS_ORDER': FAIXAS_ORDER,
     })
+
+
+def _get_ranking(aluno=None):
+    hoje = date.today()
+    todos = Aluno.objects.filter(status='ativo')
+    data = []
+    for a in todos:
+        pags = MensalidadePagamento.objects.filter(aluno=a, pago_em__isnull=False).count()
+        grads = GraduacaoAluno.objects.filter(aluno=a).count()
+        dias = (hoje - a.data_inicio).days if a.data_inicio else 0
+        xp = dias * 10 + grads * 500 + pags * 50
+        data.append((a.pk, a.nome, xp))
+    data.sort(key=lambda x: x[2], reverse=True)
+    return data
 
 
 def _get_alunos_queryset(user):

@@ -10,10 +10,16 @@
     </div>
     <div class="flex items-center gap-3 text-sm">
       <span class="text-gray-500"><i class="far fa-calendar-alt mr-1"></i>{% now "d/m/Y" %}</span>
-      <a href="{% url 'core:mensalidades_atrasadas' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+      <a href="{% url 'alunos:presenca_manual' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+        <i class="fas fa-user-check"></i> Presença
+      </a>
+      <a href="{% url 'alunos:qr_code' %}" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+        <i class="fas fa-qrcode"></i> QR Code
+      </a>
+      <a href="{% url 'core:mensalidades_atrasadas' %}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
         <i class="fas fa-exclamation-triangle"></i> Atrasados
       </a>
-      <a href="{% url 'core:financeiro' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+      <a href="{% url 'core:financeiro' %}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">
         <i class="fas fa-dollar-sign"></i> Financeiro
       </a>
     </div>

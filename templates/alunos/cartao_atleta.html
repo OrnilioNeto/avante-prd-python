@@ -1,0 +1,78 @@
+{% extends 'base_public.html' %}
+{% block title %}{{ aluno.nome }} - Cartão de Atleta{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 p-4">
+  <div class="max-w-md mx-auto space-y-4">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="bg-gradient-to-r from-green-700 to-green-600 p-6 text-white text-center">
+        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto text-3xl font-bold border-4 border-white/30 shadow-lg">
+          {{ aluno.nome|first|upper }}{{ aluno.nome|cut:" "|slice:":1" }}
+        </div>
+        <h2 class="text-xl font-bold mt-3">{{ aluno.nome }}</h2>
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <span class="px-4 py-1 rounded-full text-sm font-medium bg-white/20">{{ aluno.faixa }} {{ aluno.grau }}°</span>
+        </div>
+        <p class="text-sm opacity-80 mt-1">Código: {{ aluno.codigo }}</p>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div class="bg-green-50 rounded-xl p-4 text-center">
+          <p class="text-3xl font-bold text-green-700">{{ assiduidade }}%</p>
+          <p class="text-sm text-green-600">Assiduidade</p>
+          <p class="text-xs text-green-500">{{ total_presencas }} presenças em {{ dias_desde_inicio }} dias</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-purple-50 rounded-xl p-3 text-center">
+            <p class="text-lg font-bold text-purple-700">{{ total_xp }}</p>
+            <p class="text-xs text-purple-600">XP Total</p>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-3 text-center">
+            <p class="text-lg font-bold text-amber-700">#{{ posicao }}</p>
+            <p class="text-xs text-amber-600">Ranking ({{ ranking_count }})</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-2xl p-5">
+      <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-medal text-purple-600"></i> Graduações
+      </h3>
+      <div class="space-y-2">
+        {% for g in graduacoes %}
+        <div class="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+          <span class="text-sm text-gray-700">{{ g.faixa_anterior }} {{ g.grau_anterior }}° → {{ g.faixa_nova }} {{ g.grau_novo }}°</span>
+          <span class="text-xs text-gray-400">{{ g.graduado_em|date:"d/m/Y" }}</span>
+        </div>
+        {% empty %}
+        <p class="text-sm text-gray-400 text-center py-2">Nenhuma graduação ainda.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-2xl p-5">
+      <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-credit-card text-green-600"></i> Financeiro
+      </h3>
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="bg-green-50 rounded-xl p-3">
+          <p class="text-lg font-bold text-green-700">{{ pagamentos_em_dia.count }}</p>
+          <p class="text-xs text-green-600">Pagas</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3">
+          <p class="text-lg font-bold text-red-700">{{ pagamentos_em_atraso.count }}</p>
+          <p class="text-xs text-red-600">Atrasadas</p>
+        </div>
+      </div>
+      <p class="text-center text-sm text-gray-500 mt-2">Total pago: R$ {{ total_pago }}</p>
+    </div>
+
+    <div class="text-center">
+      <a href="{% url 'core:registrar_presenca' %}" class="inline-block bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-lg transition text-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Voltar
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
