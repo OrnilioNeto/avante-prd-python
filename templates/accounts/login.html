@@ -114,6 +114,50 @@
     color: #292524;
     pointer-events: none;
   }
+  @keyframes rollL {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(-20px,-30px) rotate(-10deg); }
+    50% { transform: translate(0,-40px) rotate(0deg); }
+    75% { transform: translate(20px,-30px) rotate(10deg); }
+  }
+  @keyframes rollR {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(20px,30px) rotate(10deg); }
+    50% { transform: translate(0,40px) rotate(0deg); }
+    75% { transform: translate(-20px,30px) rotate(-10deg); }
+  }
+  @keyframes armDrag {
+    0%, 100% { transform: rotate(0deg) scaleX(1); }
+    25% { transform: rotate(-20deg) scaleX(0.8); }
+    50% { transform: rotate(10deg) scaleX(1.1); }
+    75% { transform: rotate(-10deg) scaleX(0.9); }
+  }
+  @keyframes legSweep {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    50% { transform: rotate(15deg) translateY(-5px); }
+  }
+  .bjj-figures {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 60px;
+    opacity: 0.08;
+    transition: opacity 0.5s;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .bjj-figures:hover { opacity: 0.25; }
+  .bjj-figures:hover .fighter-top { animation: rollL 1.2s ease-in-out infinite; }
+  .bjj-figures:hover .fighter-bot { animation: rollR 1.2s ease-in-out infinite; }
+  .bjj-figures:hover .arm-l { animation: armDrag 0.8s ease-in-out infinite; transform-origin: right center; }
+  .bjj-figures:hover .leg-l { animation: legSweep 0.6s ease-in-out infinite; transform-origin: top center; }
+  .fighter { position: absolute; border-radius: 50%; }
+  .fighter-top { width: 36px; height: 36px; background: #292524; top: 0; left: 42px; z-index: 2; transition: all 0.3s; }
+  .fighter-bot { width: 40px; height: 40px; background: #78716c; top: 20px; left: 40px; z-index: 1; }
+  .arm-l { position: absolute; width: 20px; height: 6px; background: #292524; border-radius: 3px; top: 20px; left: 55px; }
+  .leg-l { position: absolute; width: 8px; height: 18px; background: #292524; border-radius: 4px; top: 30px; left: 45px; }
   .tatame-corner {
     position: absolute;
     width: 40px;
@@ -143,9 +187,7 @@
     </div>
 
     <div class="text-center mb-8 relative">
-      <div class="mx-auto mb-5 w-16 h-16 rounded-2xl bg-[#292524] flex items-center justify-center shadow-lg" style="transform: rotate(45deg);">
-        <span class="text-white text-2xl font-black" style="transform: rotate(-45deg);">A</span>
-      </div>
+      <img src="{% static 'image/avante.jpeg' %}" alt="Avante" class="h-16 w-16 mx-auto mb-4 rounded-2xl object-cover shadow-lg">
       <h1 class="text-3xl font-black text-[#292524] tracking-tight">AVANTE</h1>
       <p class="text-stone-500 text-sm mt-1.5 font-medium tracking-wide uppercase">Jiu-Jitsu · Academia</p>
     </div>
@@ -176,6 +218,12 @@
     <div class="mt-8 text-center border-t border-stone-100 pt-5">
       <p class="text-xs text-stone-400">Avante Brazilian Jiu-Jitsu</p>
     </div>
+  </div>
+  <div class="bjj-figures">
+    <div class="fighter fighter-top"></div>
+    <div class="fighter fighter-bot"></div>
+    <div class="arm-l"></div>
+    <div class="leg-l"></div>
   </div>
 </div>
 {% endblock %}
