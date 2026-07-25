@@ -335,30 +335,31 @@ def test_email(request):
     from apps.accounts.models import User
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
-    import socket
-    for hostname in ['smtp-relay.brevo.com', 'smtp-relay.sendinblue.com', 'smtp.gmail.com']:
-        lines.append(f'--- DNS {hostname} ---')
-        try:
-            ips = socket.getaddrinfo(hostname, 587)
-            for ip in ips[:2]:
-                lines.append(f'  {ip[4]}')
-        except Exception as e:
-            lines.append(f'  DNS error: {e}')
-    for host, pw in [('smtp-relay.brevo.com', 'vIJXq0aOEC6SLb5z'), ('smtp.gmail.com', 'vIJXq0aOEC6SLb5z')]:
-        lines.append(f'--- Tentando {host} porta 587 ---')
-        try:
-            backend = EmailBackend(
-                host=host, port=587,
-                username='avantebrazilianjj@gmail.com',
-                password=pw,
-                use_tls=True, fail_silently=False,
-            )
-            email = EmailMessage('Teste Avante', f'Teste via {host}', 'avante <avantebrazilianjj@gmail.com>', [to_email], connection=backend)
-            email.send()
-            lines.append(f'{host} FUNCIONOU!')
-            break
-        except Exception as e:
-            lines.append(f'{host}: {type(e).__name__}: {e}')
+    import json, urllib.request
+    lines.append('--- Tentando Brevo REST API ---')
+    try:
+        data = json.dumps({
+            'sender': {'email': 'avantebrazilianjj@gmail.com', 'name': 'Avante'},
+            'to': [{'email': to_email}],
+            'subject': 'Teste Avante API',
+            'textContent': 'Teste via Brevo REST API.',
+        }).encode('utf-8')
+        req = urllib.request.Request(
+            'https://api.brevo.com/v3/smtp/email',
+            data=data,
+            headers={
+                'api-key': 'vIJXq0aOEC6SLb5z',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            method='POST',
+        )
+        resp = urllib.request.urlopen(req, timeout=30)
+        lines.append(f'API STATUS: {resp.status} {resp.read().decode()[:200]}')
+    except urllib.error.HTTPError as e:
+        lines.append(f'API HTTP ERROR {e.code}: {e.read().decode()[:200]}')
+    except Exception as e:
+        lines.append(f'API ERROR: {type(e).__name__}: {e}')
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
 
