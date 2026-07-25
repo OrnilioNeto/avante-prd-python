@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
-from django.core.management import call_command
+
 from django.db.models import Count, Sum, Q
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -501,25 +501,33 @@ def deploy_view(request):
             output.append('venv pip nao encontrado, tentando pip3')
             r = subprocess.run(['pip3', 'install', '-r', os.path.join(repo_root, 'requirements.txt')], capture_output=True, text=True, cwd=repo_root)
             output.append((r.stdout + r.stderr)[-500:])
+        manage_py = os.path.join(repo_root, 'manage.py')
         if request.GET.get('reset'):
             output.append('=== RESET DB ===')
-            call_command('flush', '--noinput')
-            from django.contrib.auth import get_user_model
-            UserModel = get_user_model()
-            if not UserModel.objects.filter(username='admin').exists():
-                UserModel.objects.create_superuser('admin', 'admin@avante.com', 'admin')
-            admin_user = UserModel.objects.filter(username='admin').first()
-            if admin_user and admin_user.must_change_password:
-                admin_user.must_change_password = False
-                admin_user.save(update_fields=['must_change_password'])
-            output.append('Superuser admin/admin criado')
+            subprocess.run([sys.executable, manage_py, 'flush', '--noinput'], capture_output=True, cwd=repo_root)
+            r = subprocess.run([sys.executable, manage_py, 'shell', '-c', '''
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@avante.com', 'admin')
+admin = User.objects.filter(username='admin').first()
+if admin and admin.must_change_password:
+    admin.must_change_password = False
+    admin.save(update_fields=['must_change_password'])
+print('Superuser admin/admin criado')
+'''], capture_output=True, text=True, cwd=repo_root)
+            output.append((r.stdout + r.stderr)[-200:])
         output.append('=== MIGRATE ===')
-        call_command('migrate', '--noinput')
+        try:
+            r = subprocess.run([sys.executable, manage_py, 'migrate', '--noinput'], capture_output=True, text=True, cwd=repo_root)
+            output.append((r.stdout + r.stderr)[-800:])
+        except Exception as e:
+            output.append(f'Migrate error: {e}')
         if request.GET.get('reset'):
             output.append('=== SEED ===')
             try:
-                call_command('seed')
-                output.append('Seed concluido')
+                r = subprocess.run([sys.executable, manage_py, 'seed'], capture_output=True, text=True, cwd=repo_root)
+                output.append((r.stdout + r.stderr)[-200:])
             except Exception as e:
                 output.append(f'Seed error: {e}')
         output.append('=== CLEANUP DUPLICATE PAYMENTS ===')
@@ -534,7 +542,7 @@ def deploy_view(request):
         deleted, _ = qs.delete()
         output.append(f'Registros duplicados removidos: {deleted}')
         output.append('=== COLLECTSTATIC ===')
-        call_command('collectstatic', '--noinput', '--clear')
+        subprocess.run([sys.executable, manage_py, 'collectstatic', '--noinput', '--clear'], capture_output=True, cwd=repo_root)
         output.append('=== WRITE .ENV (pos-pull) ===')
         env_path = str(Path(repo_root) / '.env')
         with open(env_path, 'w') as f:
