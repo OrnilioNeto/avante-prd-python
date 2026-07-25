@@ -1,5 +1,6 @@
 import json
 import urllib.request
+from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import sanitize_address
 
@@ -7,7 +8,7 @@ from django.core.mail.message import sanitize_address
 class BrevoAPIEmailBackend(BaseEmailBackend):
     def __init__(self, api_key=None, **kwargs):
         super().__init__(**kwargs)
-        self.api_key = api_key or 'vIJXq0aOEC6SLb5z'
+        self.api_key = api_key or settings.BREVO_API_KEY
 
     def send_messages(self, email_messages):
         sent = 0

@@ -330,52 +330,16 @@ def test_email(request):
     lines.append(f'settings EMAIL_HOST_USER: {s.EMAIL_HOST_USER}')
     lines.append(f'settings EMAIL_USE_TLS: {s.EMAIL_USE_TLS}')
     lines.append(f'settings DEFAULT_FROM_EMAIL: {s.DEFAULT_FROM_EMAIL}')
-    env_path = Path(__file__).resolve().parent.parent.parent / '.env'
     to_email = request.GET.get('to', 'avantebrazilianjj@gmail.com')
     from apps.accounts.models import User
     has_user = User.objects.filter(email=to_email).exists()
     lines.append(f'Usuario com email {to_email}: {"SIM" if has_user else "NAO"}')
-    import json, urllib.request
-    brevo_api_keys = ['b33835001@smtp-brevo.com', 'vIJXq0aOEC6SLb5z']
-    for key in brevo_api_keys:
-        lines.append(f'--- Tentando Brevo REST API com api-key={key[:8]}... ---')
-        try:
-            data = json.dumps({
-                'sender': {'email': 'avantebrazilianjj@gmail.com', 'name': 'Avante'},
-                'to': [{'email': to_email}],
-                'subject': 'Teste Avante API',
-                'textContent': f'Teste via Brevo REST API (key={key[:8]}...).',
-            }).encode('utf-8')
-            req = urllib.request.Request(
-                'https://api.brevo.com/v3/smtp/email',
-                data=data,
-                headers={
-                    'api-key': key,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                method='POST',
-            )
-            resp = urllib.request.urlopen(req, timeout=30)
-            lines.append(f'API STATUS: key={key[:8]}... -> {resp.status} {resp.read().decode()[:200]}')
-            break
-        except urllib.error.HTTPError as e:
-            lines.append(f'key={key[:8]}... HTTP {e.code}: {e.read().decode()[:100]}')
-        except Exception as e:
-            lines.append(f'key={key[:8]}... ERROR: {type(e).__name__}: {e}')
-    lines.append(f'--- Tentando SMTP com usuario correto: b33835001@smtp-brevo.com ---')
+    lines.append(f'--- Tentando enviar email via EMAIL_BACKEND atual ---')
     try:
-        backend = EmailBackend(
-            host='smtp-relay.brevo.com', port=587,
-            username='b33835001@smtp-brevo.com',
-            password='vIJXq0aOEC6SLb5z',
-            use_tls=True, fail_silently=False,
-        )
-        email = EmailMessage('Teste Avante', 'Teste via SMTP com usuario correto.', 'avante <avantebrazilianjj@gmail.com>', [to_email], connection=backend)
-        email.send()
-        lines.append('SMTP FUNCIONOU!')
+        send_mail('Teste Avante', 'Teste de envio via backend configurado.', None, [to_email], fail_silently=False)
+        lines.append('EMAIL ENVIADO COM SUCESSO!')
     except Exception as e:
-        lines.append(f'SMTP: {type(e).__name__}: {e}')
+        lines.append(f'ERRO: {type(e).__name__}: {e}')
     return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
 
 
@@ -389,14 +353,12 @@ def deploy_view(request):
         output.append('=== WRITE .ENV ===')
         env_path = str(Path(repo_root) / '.env')
         env_vars = {
-            'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-            'EMAIL_HOST': 'smtp-relay.brevo.com',
-            'EMAIL_PORT': '587',
-            'EMAIL_HOST_USER': 'b33835001@smtp-brevo.com',
-            'EMAIL_HOST_PASSWORD': 'vIJXq0aOEC6SLb5z',
-            'EMAIL_USE_TLS': 'True',
+            'EMAIL_BACKEND': 'apps.core.brevo_email_backend.BrevoAPIEmailBackend',
             'DEFAULT_FROM_EMAIL': 'avante <avantebrazilianjj@gmail.com>',
         }
+        brevo_api_key = request.GET.get('brevo_api_key') or os.environ.get('BREVO_API_KEY', '')
+        if brevo_api_key:
+            env_vars['BREVO_API_KEY'] = brevo_api_key
         with open(env_path, 'w') as f:
             for k, v in env_vars.items():
                 if any(c in v for c in ' @#$%^&*()=!'):
