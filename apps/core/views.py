@@ -459,9 +459,12 @@ def test_email(request):
 
 @staff_member_required
 def deploy_view(request):
-    import subprocess, os, sys
+    import subprocess, os
     from pathlib import Path
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    venv_python = os.path.join(repo_root, 'venv', 'bin', 'python')
+    if not os.path.exists(venv_python):
+        venv_python = 'python3'
     output = []
     is_authorized = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
     secret = request.GET.get('token', '')
@@ -504,8 +507,8 @@ def deploy_view(request):
         manage_py = os.path.join(repo_root, 'manage.py')
         if request.GET.get('reset'):
             output.append('=== RESET DB ===')
-            subprocess.run([sys.executable, manage_py, 'flush', '--noinput'], capture_output=True, cwd=repo_root)
-            r = subprocess.run([sys.executable, manage_py, 'shell', '-c', '''
+            subprocess.run([venv_python, manage_py, 'flush', '--noinput'], capture_output=True, cwd=repo_root)
+            r = subprocess.run([venv_python, manage_py, 'shell', '-c', '''
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
@@ -519,14 +522,14 @@ print('Superuser admin/admin criado')
             output.append((r.stdout + r.stderr)[-200:])
         output.append('=== MIGRATE ===')
         try:
-            r = subprocess.run([sys.executable, manage_py, 'migrate', '--noinput'], capture_output=True, text=True, cwd=repo_root)
+            r = subprocess.run([venv_python, manage_py, 'migrate', '--noinput'], capture_output=True, text=True, cwd=repo_root)
             output.append((r.stdout + r.stderr)[-800:])
         except Exception as e:
             output.append(f'Migrate error: {e}')
         if request.GET.get('reset'):
             output.append('=== SEED ===')
             try:
-                r = subprocess.run([sys.executable, manage_py, 'seed'], capture_output=True, text=True, cwd=repo_root)
+                r = subprocess.run([venv_python, manage_py, 'seed'], capture_output=True, text=True, cwd=repo_root)
                 output.append((r.stdout + r.stderr)[-200:])
             except Exception as e:
                 output.append(f'Seed error: {e}')
@@ -542,7 +545,7 @@ print('Superuser admin/admin criado')
         deleted, _ = qs.delete()
         output.append(f'Registros duplicados removidos: {deleted}')
         output.append('=== COLLECTSTATIC ===')
-        subprocess.run([sys.executable, manage_py, 'collectstatic', '--noinput', '--clear'], capture_output=True, cwd=repo_root)
+        subprocess.run([venv_python, manage_py, 'collectstatic', '--noinput', '--clear'], capture_output=True, cwd=repo_root)
         output.append('=== WRITE .ENV (pos-pull) ===')
         env_path = str(Path(repo_root) / '.env')
         with open(env_path, 'w') as f:
