@@ -359,7 +359,10 @@ def deploy_view(request):
         }
         with open(env_path, 'w') as f:
             for k, v in env_vars.items():
-                f.write(f'{k}={v}\n')
+                if any(c in v for c in ' @#$%^&*()=!'):
+                    f.write(f'{k}="{v}"\n')
+                else:
+                    f.write(f'{k}={v}\n')
         output.append(f'.env criado com {len(env_vars)} variaveis')
         output.append('=== GIT RESET + CLEAN + PULL ===')
         r = subprocess.run(['git', 'reset', '--hard', 'HEAD'], capture_output=True, text=True, cwd=repo_root)
@@ -375,7 +378,10 @@ def deploy_view(request):
         output.append('=== WRITE .ENV (pos-pull) ===')
         with open(env_path, 'w') as f:
             for k, v in env_vars.items():
-                f.write(f'{k}={v}\n')
+                if any(c in v for c in ' @#$%^&*()=!'):
+                    f.write(f'{k}="{v}"\n')
+                else:
+                    f.write(f'{k}={v}\n')
         output.append('.env recriado apos git clean')
         output.append('=== TOUCH WSGI ===')
         subprocess.run(['touch', '/var/www/avante_pythonanywhere_com_wsgi.py'])
