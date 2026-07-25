@@ -1,6 +1,6 @@
 ﻿import os
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -103,15 +103,16 @@ LOGOUT_REDIRECT_URL = 'accounts:login'
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'tailwind'
 CRISPY_TEMPLATE_PACK = 'tailwind'
 
-BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
+_env_file = dotenv_values(BASE_DIR / '.env')
+BREVO_API_KEY = _env_file.get('BREVO_API_KEY') or os.getenv('BREVO_API_KEY', '')
 _DEFAULT_EMAIL_BACKEND = 'apps.core.brevo_email_backend.BrevoAPIEmailBackend' if BREVO_API_KEY else 'django.core.mail.backends.console.EmailBackend'
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', _DEFAULT_EMAIL_BACKEND)
-EMAIL_HOST = os.getenv('EMAIL_HOST', '')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'avante <avantebrazilianjj@gmail.com>')
+EMAIL_BACKEND = _env_file.get('EMAIL_BACKEND') or os.getenv('EMAIL_BACKEND', _DEFAULT_EMAIL_BACKEND)
+EMAIL_HOST = _env_file.get('EMAIL_HOST') or os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(_env_file.get('EMAIL_PORT') or os.getenv('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = _env_file.get('EMAIL_HOST_USER') or os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = _env_file.get('EMAIL_HOST_PASSWORD') or os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = (_env_file.get('EMAIL_USE_TLS') or os.getenv('EMAIL_USE_TLS', 'True')).lower() == 'true'
+DEFAULT_FROM_EMAIL = _env_file.get('DEFAULT_FROM_EMAIL') or os.getenv('DEFAULT_FROM_EMAIL', 'avante <avantebrazilianjj@gmail.com>')
 
 LOGGING = {
     'version': 1,
