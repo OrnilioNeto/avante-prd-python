@@ -350,19 +350,20 @@ def test_email(request):
 @staff_member_required
 def deploy_view(request):
     import subprocess, os
+    from pathlib import Path
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
     output = []
     try:
         output.append('=== WRITE .ENV ===')
-        env_path = os.path.join(repo_root, '.env')
+        env_path = str(Path(repo_root) / '.env')
         env_vars = {
-            'EMAIL_BACKEND': os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend'),
-            'EMAIL_HOST': os.environ.get('EMAIL_HOST', 'smtp.gmail.com'),
-            'EMAIL_PORT': os.environ.get('EMAIL_PORT', '587'),
-            'EMAIL_HOST_USER': os.environ.get('EMAIL_HOST_USER', 'avantebrazilianjj@gmail.com'),
-            'EMAIL_HOST_PASSWORD': os.environ.get('EMAIL_HOST_PASSWORD', '@Machado2025'),
-            'EMAIL_USE_TLS': os.environ.get('EMAIL_USE_TLS', 'True'),
-            'DEFAULT_FROM_EMAIL': os.environ.get('DEFAULT_FROM_EMAIL', 'avante <avantebrazilianjj@gmail.com>'),
+            'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'EMAIL_HOST': 'smtp.gmail.com',
+            'EMAIL_PORT': '587',
+            'EMAIL_HOST_USER': 'avantebrazilianjj@gmail.com',
+            'EMAIL_HOST_PASSWORD': '@Machado2025',
+            'EMAIL_USE_TLS': 'True',
+            'DEFAULT_FROM_EMAIL': 'avante <avantebrazilianjj@gmail.com>',
         }
         with open(env_path, 'w') as f:
             for k, v in env_vars.items():
@@ -383,6 +384,7 @@ def deploy_view(request):
         output.append('=== COLLECTSTATIC ===')
         call_command('collectstatic', '--noinput', '--clear')
         output.append('=== WRITE .ENV (pos-pull) ===')
+        env_path = str(Path(repo_root) / '.env')
         with open(env_path, 'w') as f:
             for k, v in env_vars.items():
                 if any(c in v for c in ' @#$%^&*()=!'):
