@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Seguindo - Avante{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Quem estou seguindo</h1>
+    <p class="text-gray-500 mt-1">{{ users.count }} pessoas</p>
+  </div>
+  <div class="bg-white rounded-2xl shadow-md border border-gray-100 divide-y divide-gray-50">
+    {% for u in users %}
+    <div class="px-5 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+      <a href="{% url 'rede:perfil' u.pk %}" class="flex items-center gap-3 min-w-0">
+        {% if u.profile_photo %}
+        <img src="{{ u.profile_photo.url }}" class="h-10 w-10 rounded-full object-cover flex-shrink-0">
+        {% else %}
+        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">
+          {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+        </div>
+        {% endif %}
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-800 truncate">{{ u.get_full_name|default:u.username }}</p>
+          <p class="text-xs text-gray-400">{{ u.get_role_display }}</p>
+        </div>
+      </a>
+      <form method="post" action="{% url 'rede:seguir' u.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="text-xs text-red-500 font-medium hover:text-red-600">Deixar de seguir</button>
+      </form>
+    </div>
+    {% empty %}
+    <div class="px-5 py-10 text-center text-gray-400">
+      <i class="fas fa-user-friends text-3xl mb-2 text-gray-300"></i>
+      <p>Você não está seguindo ninguém ainda.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

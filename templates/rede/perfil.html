@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - Avante{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6">
+    <div class="flex items-center gap-5">
+      {% if profile_user.profile_photo %}
+      <img src="{{ profile_user.profile_photo.url }}" class="h-20 w-20 rounded-full object-cover border-2 border-green-200">
+      {% else %}
+      <div class="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center text-2xl font-bold text-green-700 border-2 border-green-200">
+        {{ profile_user.first_name|first|upper }}{{ profile_user.last_name|first|upper }}
+      </div>
+      {% endif %}
+      <div class="flex-1 min-w-0">
+        <h1 class="text-xl font-bold text-gray-900">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+        <p class="text-sm text-gray-500">{{ profile_user.get_role_display }}{% if profile_user.faixa %} · {{ profile_user.faixa }} {{ profile_user.grau }}°{% endif %}</p>
+        <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+          <span><strong class="text-gray-800">{{ posts.count }}</strong> posts</span>
+          <span><strong class="text-gray-800">{{ seguidores }}</strong> seguidores</span>
+          <span><strong class="text-gray-800">{{ seguindo }}</strong> seguindo</span>
+        </div>
+      </div>
+      <div>
+        {% if profile_user != user %}
+        <form method="post" action="{% url 'rede:seguir' profile_user.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium transition {% if ja_segue %}bg-gray-100 text-gray-700 hover:bg-gray-200{% else %}bg-green-600 text-white hover:bg-green-700{% endif %}">
+            {% if ja_segue %}Seguindo{% else %}Seguir{% endif %}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4">
+    {% for post in posts %}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+      {% if post.image %}
+      <img src="{{ post.image.url }}" class="w-full max-h-96 object-cover bg-gray-100">
+      {% endif %}
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-gray-400">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+          {% if post.author == user or user.is_superuser %}
+          <a href="{% url 'rede:excluir_post' post.pk %}" class="text-gray-300 hover:text-red-500 transition text-sm" onclick="return confirm('Excluir post?')">
+            <i class="fas fa-trash"></i>
+          </a>
+          {% endif %}
+        </div>
+        {% if post.content %}
+        <p class="text-sm text-gray-700">{{ post.content }}</p>
+        {% endif %}
+        <div class="mt-2 flex items-center gap-4 text-sm text-gray-400">
+          <span><i class="fas fa-heart text-red-500 mr-1"></i>{{ post.total_likes }}</span>
+          <span><i class="far fa-comment mr-1"></i>{{ post.total_comments }}</span>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-12 text-gray-400">
+      <i class="fas fa-camera text-4xl mb-3 text-gray-300"></i>
+      <p>Nenhum post ainda.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

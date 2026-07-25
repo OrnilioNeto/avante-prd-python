@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Rede Social - Avante{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
+      <form method="post" action="{% url 'rede:criar_post' %}" enctype="multipart/form-data" class="flex items-center gap-3">
+        {% csrf_token %}
+        {% if user.profile_photo %}
+        <img src="{{ user.profile_photo.url }}" class="h-10 w-10 rounded-full object-cover flex-shrink-0">
+        {% else %}
+        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        {% endif %}
+        <input type="text" name="content" placeholder="O que está acontecendo, {{ user.first_name }}?" class="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-green-400">
+        <label class="cursor-pointer text-gray-400 hover:text-green-600 transition p-2">
+          <i class="fas fa-image text-lg"></i>
+          <input type="file" name="image" accept="image/*" class="hidden" onchange="this.form.submit()">
+        </label>
+        <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-green-700 transition flex-shrink-0">
+          Publicar
+        </button>
+      </form>
+    </div>
+
+    {% for post in posts %}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+      <div class="p-4 flex items-center justify-between">
+        <a href="{% url 'rede:perfil' post.author.pk %}" class="flex items-center gap-3">
+          {% if post.author.profile_photo %}
+          <img src="{{ post.author.profile_photo.url }}" class="h-9 w-9 rounded-full object-cover">
+          {% else %}
+          <div class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-700">
+            {{ post.author.first_name|first|upper }}{{ post.author.last_name|first|upper }}
+          </div>
+          {% endif %}
+          <div>
+            <p class="text-sm font-semibold text-gray-800">{{ post.author.get_full_name|default:post.author.username }}</p>
+            <p class="text-xs text-gray-400">{{ post.created_at|timesince }} atrás</p>
+          </div>
+        </a>
+        {% if post.author == user or user.is_superuser %}
+        <a href="{% url 'rede:excluir_post' post.pk %}" class="text-gray-300 hover:text-red-500 transition" onclick="return confirm('Excluir post?')">
+          <i class="fas fa-trash"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% if post.image %}
+      <img src="{{ post.image.url }}" class="w-full max-h-96 object-cover bg-gray-100">
+      {% endif %}
+      {% if post.content %}
+      <div class="px-4 py-3">
+        <p class="text-sm text-gray-700">{{ post.content }}</p>
+      </div>
+      {% endif %}
+      <div class="px-4 py-2 border-t border-gray-50 flex items-center gap-4 text-sm">
+        <form method="post" action="{% url 'rede:curtir' post.pk %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="flex items-center gap-1 {% if post.curtido %}text-red-500{% else %}text-gray-400 hover:text-red-500{% endif %} transition">
+            <i class="{% if post.curtido %}fas{% else %}far{% endif %} fa-heart"></i>
+            <span>{{ post.total_likes }}</span>
+          </button>
+        </form>
+        <button onclick="document.getElementById('comment-{{ post.pk }}').classList.toggle('hidden')" class="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition">
+          <i class="far fa-comment"></i>
+          <span>{{ post.total_comments }}</span>
+        </button>
+      </div>
+      <div id="comment-{{ post.pk }}" class="hidden border-t border-gray-50">
+        <div class="px-4 py-3 max-h-40 overflow-y-auto space-y-2">
+          {% for c in post.comentarios.all %}
+          <div class="flex items-start gap-2 text-sm">
+            <span class="font-semibold text-gray-800 whitespace-nowrap">{{ c.user.first_name }}</span>
+            <span class="text-gray-600">{{ c.content }}</span>
+            <span class="text-xs text-gray-400 ml-auto whitespace-nowrap">{{ c.created_at|timesince }}</span>
+          </div>
+          {% empty %}
+          <p class="text-xs text-gray-400 text-center">Nenhum comentário ainda.</p>
+          {% endfor %}
+        </div>
+        <form method="post" action="{% url 'rede:comentar' post.pk %}" class="flex items-center gap-2 border-t border-gray-50 px-4 py-2">
+          {% csrf_token %}
+          <input type="text" name="content" placeholder="Digite um comentário..." class="flex-1 border-0 text-sm focus:outline-none" required>
+          <button type="submit" class="text-green-600 font-medium text-sm hover:text-green-700">Publicar</button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-12 text-gray-400">
+      <i class="fas fa-newspaper text-4xl mb-3 text-gray-300"></i>
+      <p>Nenhum post no feed.</p>
+      <p class="text-xs mt-1">Siga outros alunos e professores para ver seus posts aqui!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+      <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-users text-green-600"></i> Sugestões</h3>
+      <div class="space-y-3">
+        {% for u in sugestoes %}
+        <div class="flex items-center justify-between">
+          <a href="{% url 'rede:perfil' u.pk %}" class="flex items-center gap-2 min-w-0">
+            {% if u.profile_photo %}
+            <img src="{{ u.profile_photo.url }}" class="h-8 w-8 rounded-full object-cover flex-shrink-0">
+            {% else %}
+            <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-700 flex-shrink-0">
+              {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+            </div>
+            {% endif %}
+            <span class="text-sm font-medium text-gray-700 truncate">{{ u.get_full_name|default:u.username }}</span>
+          </a>
+          <form method="post" action="{% url 'rede:seguir' u.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="text-xs text-green-600 font-medium hover:text-green-700 whitespace-nowrap">Seguir</button>
+          </form>
+        </div>
+        {% empty %}
+        <p class="text-xs text-gray-400 text-center">Nenhuma sugestão no momento.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
+      <a href="{% url 'rede:seguindo' %}" class="text-sm font-medium text-gray-800 hover:text-green-600 transition flex items-center gap-2">
+        <i class="fas fa-user-check text-green-600"></i> Quem estou seguindo
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

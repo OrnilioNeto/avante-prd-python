@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.parametros',
     'apps.relatorios',
     'apps.midia',
+    'apps.rede',
 ]
 
 MIDDLEWARE = [
