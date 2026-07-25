@@ -9,3 +9,8 @@ venv/
 *.egg-info/
 dist/
 build/
+deploy_*.py
+run_on_pa*.py
+check_frame.py
+verify_login.py
+trigger_deploy*.py
