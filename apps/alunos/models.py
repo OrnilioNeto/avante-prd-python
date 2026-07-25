@@ -37,6 +37,14 @@ class Aluno(models.Model):
         verbose_name_plural = 'Alunos'
         ordering = ['nome']
 
+    @property
+    def filial_nome(self):
+        return self.filial.nome if self.filial else '-'
+
+    @property
+    def horario_treino_descricao(self):
+        return self.horario_treino.descricao if self.horario_treino else '-'
+
     def __str__(self):
         return self.nome
 

@@ -22,8 +22,8 @@
                 <p><strong>Telefone:</strong> {{ aluno.telefone|default:"-" }}</p>
                 <p><strong>Data Nasc.:</strong> {{ aluno.data_nascimento|date:"d/m/Y" }}</p>
                 <p><strong>Data Início:</strong> {{ aluno.data_inicio|date:"d/m/Y" }}</p>
-                <p><strong>Filial:</strong> {{ aluno.filial.nome|default:"-" }}</p>
-                <p><strong>Horário Treino:</strong> {{ aluno.horario_treino.descricao|default:"-" }}</p>
+                <p><strong>Filial:</strong> {{ aluno.filial_nome }}</p>
+                <p><strong>Horário Treino:</strong> {{ aluno.horario_treino_descricao }}</p>
                 <p><strong>Modalidades:</strong>
                   {% if aluno.modalidades %}
                     {% for m_id in aluno.modalidades %}

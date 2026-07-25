@@ -84,7 +84,7 @@
           </div>
           <div class="min-w-0">
             <p class="text-sm font-medium text-gray-800 truncate">{{ pag.aluno.nome }}</p>
-            <p class="text-xs text-gray-400">{{ pag.aluno.filial.nome|default:'-' }} · {{ pag.vencimento_em|date:"d/m/Y" }}</p>
+            <p class="text-xs text-gray-400">{{ pag.aluno.filial_nome }} · {{ pag.vencimento_em|date:"d/m/Y" }}</p>
           </div>
         </div>
         <div class="text-right flex-shrink-0 ml-3">
@@ -185,7 +185,7 @@
           </div>
           <div class="min-w-0">
             <p class="text-sm font-medium text-gray-800 truncate">{{ aluno.nome }}</p>
-            <p class="text-xs text-gray-400">{{ aluno.faixa }} {{ aluno.grau }}° · {{ aluno.filial.nome|default:'-' }}</p>
+            <p class="text-xs text-gray-400">{{ aluno.faixa }} {{ aluno.grau }}° · {{ aluno.filial_nome }}</p>
           </div>
         </div>
         <p class="text-xs text-gray-400 flex-shrink-0 ml-3">{{ aluno.created_at|date:"d/m/Y" }}</p>
