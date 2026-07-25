@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.db.models import Count, Sum, Q
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from apps.alunos.models import Aluno, MensalidadePagamento, GraduacaoAluno
 from apps.core.mixins import _user_is_admin
 
@@ -14,6 +14,8 @@ def dashboard(request):
     user = request.user
     ctx = {}
 
+    if user.role == 'aluno':
+        return redirect('core:minha_conta')
     if _user_is_admin(user):
         alunos = Aluno.objects.all()
     elif user.role == 'professor':

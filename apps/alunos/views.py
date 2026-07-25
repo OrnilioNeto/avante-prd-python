@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 from django.views import View
 from .models import Aluno, MensalidadePagamento, GraduacaoAluno
+from apps.accounts.models import User
 from apps.parametros.models import Modalidade, HorarioTreino
 from apps.core.mixins import RoleFilterMixin, RoleFilterDetailMixin, PermissaoMixin
 
@@ -35,7 +36,22 @@ class AlunoCreateView(LoginRequiredMixin, PermissaoMixin, CreateView):
         modalidades_ids = self.request.POST.getlist('modalidades')
         if modalidades_ids:
             form.instance.modalidades = [int(x) for x in modalidades_ids]
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        aluno = self.object
+        cpf_limpo = aluno.cpf.replace('.', '').replace('-', '')
+        username = cpf_limpo if not User.objects.filter(username=cpf_limpo).exists() else f'aluno_{aluno.pk}'
+        if not User.objects.filter(cpf=aluno.cpf).exists():
+            User.objects.create_user(
+                username=username,
+                cpf=aluno.cpf,
+                email=aluno.email or '',
+                first_name=aluno.nome.split()[0] if aluno.nome.split() else aluno.nome,
+                last_name=' '.join(aluno.nome.split()[1:]) if len(aluno.nome.split()) > 1 else '',
+                role='aluno',
+                password=cpf_limpo,
+                must_change_password=True,
+            )
+        return response
 
 
 class AlunoUpdateView(LoginRequiredMixin, PermissaoMixin, UpdateView):
