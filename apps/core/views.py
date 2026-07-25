@@ -447,6 +447,11 @@ def deploy_view(request):
     from pathlib import Path
     repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
     output = []
+    is_authorized = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    secret = request.GET.get('token', '')
+    deploy_secret = os.environ.get('DEPLOY_SECRET', '')
+    if not is_authorized and (not secret or not deploy_secret or secret != deploy_secret):
+        return redirect('/login/?next=/__deploy__/')
     try:
         output.append('=== WRITE .ENV ===')
         env_path = str(Path(repo_root) / '.env')
